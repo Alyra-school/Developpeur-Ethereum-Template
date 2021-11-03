@@ -1,1 +1,1 @@
-Solidity
+Ethereum par la pratique
