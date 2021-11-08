@@ -1,1 +1,3 @@
-Truffle & CI/CD
+# Solidity
+
+### Smart contract exercises in Solidity
