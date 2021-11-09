@@ -13,9 +13,13 @@ contract(Voting, accounts => {
     const voter2 = accounts[2];
     const voter3 = accounts[3];
 
-    //as our contract doesn't have any fonction to retrieve the proposals array
-    //we need to do it manually by calling each elements of the array
-    async function getProposalsArray(voting) {
+    /** 
+     *  @description as our contract doesn't have any fonction to retrieve the proposals array,
+     *  we need to do it manually by calling each elements of the array.
+     *  @param voting The contract instance to get the datas from
+     *  @returns an array containing all the called datas from the contract array
+     */
+    async function getProposalsArray(voting){
         let proposals = [];
         try{
             for(let i = 0; true; i++){
