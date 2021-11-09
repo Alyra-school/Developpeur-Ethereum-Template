@@ -136,4 +136,9 @@ contract(Voting, accounts => {
     context("Voting", () => {
         //TODO
     })
+
+    /** 'Ending' ccontext include all the tests about the talling of votes and checking step */
+    context("Ending", () => {
+        //TODO
+    })
 })
