@@ -1,7 +1,5 @@
 const Gartic = artifacts.require("GarticPhone");
-const { BN } = require('@openzeppelin/test-helpers');
 const { expect } = require('chai');
-const truffleAssertions = require('truffle-assertions');
 
 contract("Gartic", accounts => {
     const words = [ 'first', 'second',
