@@ -1,52 +1,50 @@
-pragma solidity 0.8.9;
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.7.0 <0.9.0;
 
-contract OwnerBank {
-    /** @dev store the actual numbers of deposit */
-    uint private depositCount;
-    /** @dev store the timestamp of the first deposit */
-    uint private timestampFirst;
-    /** @notice store the address of contract owner */
-    address public owner;
-    /** @dev history of deposit, indexing a depositID to the amount of this deposit
-             depositCount is used as depositID in 'receive()' */
-    mapping (uint => uint) private fundHistory;
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-    /** @notice verify if the sender address is the owner of contract */
-    modifier onlyOwner() {
-        require(owner == msg.sender, "You are not the owner of contract");
-        _;
-    }
+contract Epargne is Ownable {
 
-    /** @notice construct the contract with an owner */
-    constructor(address _owner) {
-        require(_owner != address(0), "Owner can't be address 0");
-        owner = _owner;
-    }
+    // address admin;
+    uint dateMinimum;
+    uint depotID;
 
-    /** @notice send an 'amount' of contract funds on the owner address
-        @param amount the amount in wei */
-    function withdrawFunds(uint amount) public onlyOwner(){
-        require (amount > 0);
-        require (address(this).balance >= amount, "not enough liquidity in bank");
-        require ((block.timestamp - timestampFirst) / 60 / 60 / 24 >= 90, "You need to wait 3 months since first deposit");
-        
-        payable(owner).transfer(amount);
-        
-        emit onWithdraw(amount, block.timestamp);
-    }
+    mapping (uint => uint) depots;
 
-    /** @notice receive ethers and add an history of this deposit in 'fundHistory' */
-    receive() external payable {
-        depositCount++;
-        if(depositCount == 1){
-            //to be able to calculate time since first deposit
-            timestampFirst = block.timestamp;
+    event nouvelleEpargne(uint dateMinimum);
+    event argentDepose(uint date, uint value);
+    
+    //constructor(){
+    //    admin=msg.sender;
+    //}
+
+    receive() external payable{
+        if(address(this).balance == 0){
+            dateMinimum=block.timestamp+ 12 weeks;
+            emit nouvelleEpargne(dateMinimum);
         }
-
-        fundHistory[depositCount] = msg.value;
-        emit onDeposit(msg.value, block.timestamp);
+        depotID+=1;
+        depots[depotID]=msg.value;
+        emit argentDepose(block.timestamp,msg.value);
     }
 
-    event onWithdraw(uint amount, uint timestamp);
-    event onDeposit(uint amount, uint timestamp);
+    function sendEth() public payable{
+        if(address(this).balance - msg.value == 0){
+            dateMinimum=block.timestamp+ 12 weeks;
+            emit nouvelleEpargne(dateMinimum);
+        }
+        depotID+=1;
+        depots[depotID]=msg.value;
+        emit argentDepose(block.timestamp,msg.value);
+    }
+
+    function withdrawEth() public onlyOwner {
+        // require(msg.sender==admin, "tu n'es pas l'admin de ce contrat");
+        require(block.timestamp>=dateMinimum, "tu n'as pas attendu assez longtemps");
+        payable(msg.sender).transfer(address(this).balance);
+    }
+
+    function getBalance() public view onlyOwner returns(uint){
+        return address(this).balance;
+    }
 }
