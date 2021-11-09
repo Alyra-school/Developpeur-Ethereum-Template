@@ -24,6 +24,7 @@ contract(Voting, accounts => {
         }
     }
 
+    /** 'Voters registration' context include all tests about the voters registering step */
     context("Voters registration", () => {
         /** Initial state: 
          * - contract is deployed by the admin address
@@ -56,6 +57,7 @@ contract(Voting, accounts => {
         })
     })
 
+    /** 'Proposal registration' context include all tests about the proposal registration step */
     context("Proposal registration", () => {
         /** Initial state: 
          * - contract is deployed by the admin address
@@ -130,6 +132,7 @@ contract(Voting, accounts => {
         })
     })
 
+    /** 'Voting' context include all the tests about the voting step */
     context("Voting", () => {
         //TODO
     })
