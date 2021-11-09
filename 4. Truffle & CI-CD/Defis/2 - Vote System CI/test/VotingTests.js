@@ -75,6 +75,8 @@ contract(Voting, accounts => {
                 "Proposals are not allowed yet"
             );
         })
+        /** as we already tested the same function in the 'Voters registration' context,
+         *  we could skip it this time to save time on testing...*/
         it("should try to change state from non-admin address and revert", async () => {
             await expectRevert(
                 this.voting.startProposalsRegistering({from: voter2}),
