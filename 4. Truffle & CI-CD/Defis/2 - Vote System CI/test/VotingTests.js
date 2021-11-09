@@ -1,3 +1,7 @@
+/** 
+ *  @description This file describe all the tests for the contract voting.sol
+ *  @author Loïs L.
+ */
 const Voting = artifacts.require("Voting");
 
 const { BN, expectRevert, expectEvent } = require('@openzeppelin/test-helpers');
