@@ -96,7 +96,7 @@ contract(Voting, accounts => {
             expectEvent(receipt, 'VoterRegistered', {voterAddress: voter1});
         })
         it("should return that voter1 is registered", async () => {
-            let voterObject = await this.voting.getVoter(voter1);
+            let voterObject = await this.voting.getVoter(voter1, {from: voter1});
 
             expect(voterObject.isRegistered).to.equal(true);
         })
@@ -160,7 +160,7 @@ contract(Voting, accounts => {
             let proposals = await getProposalsArray(this.voting);
             let newProposalID = proposals.length - 1;
 
-            let voter1ProposalObject = await this.voting.getOneProposal(newProposalID, {from: voter1});
+            let voter1ProposalObject = await this.voting.getOneProposal(newProposalID);
 
             expect(voter1ProposalObject.description).to.be.equal("My first proposal");
         })
