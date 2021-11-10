@@ -13,6 +13,7 @@ contract(Voting, accounts => {
     const voter2 = accounts[2];
     const voter3 = accounts[3];
 
+
     /** 
      *  @description as our contract doesn't have any fonction to retrieve the proposals array,
      *  we need to do it manually by calling each elements of the array.
@@ -108,6 +109,7 @@ contract(Voting, accounts => {
          * - voter1 and voter2 are registered */
         before(async () => {
             this.voting = await Voting.new({from: admin});
+
             await this.voting.addVoter(voter1, {from: admin});
             await this.voting.addVoter(voter2, {from: admin});
         })
@@ -122,7 +124,7 @@ contract(Voting, accounts => {
             );
         })
         /** as we already tested the same function in the 'Voters registration' context,
-         *  we could skip it this time to save time on testing...*/
+         *  we could skip it this time and next time to save time on testing...*/
         it("should try to change state from non-admin address and revert", async () => {
             await expectRevert(
                 this.voting.startProposalsRegistering({from: voter2}),
@@ -212,7 +214,7 @@ contract(Voting, accounts => {
         //TODO
     })
 
-    /** 'Ending' ccontext include all the tests about the talling of votes and checking step */
+    /** 'Ending' context include all the tests about the talling of votes and checking step */
     context("Ending", () => {
         //TODO
     })
