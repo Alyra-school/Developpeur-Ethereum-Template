@@ -19,9 +19,13 @@ contract("Gartic", accounts => {
     const player6 = accounts[5];
     const lastPlayer = accounts[19];
 
-    beforeEach(async function() {
-        this.gartic = await Gartic.deployed();
-    })
+    context("Put a word tests", function() {
+        before(async function() {
+            /** Initial State:
+             *  - Contract is deployed by the owner and first word "first" start the game
+             */
+            this.gartic = await Gartic.new(_firstWord, {from: starterOwner});
+        })
 
     context("Put a word tests", function() {
         it("should put a new word in the chain", async function() {
@@ -41,7 +45,13 @@ contract("Gartic", accounts => {
 
     context("retrieving words tests", function() {
         before(async function() {
-            for(i = 3; i < 11; i++){
+            /** Initial State:
+             *  - Contract is deployed by the owner and first word "first" start the game
+             *  - The first ten words are put in the contract by the first ten addresses of the dev env
+             */
+            this.gartic = await Gartic.new(_firstWord, {from: starterOwner});
+
+            for(i = 2; i < 11; i++){
                 await this.gartic.putNewWord(words[i - 1], {from: accounts[i - 1]});
             }
         })
@@ -66,7 +76,14 @@ contract("Gartic", accounts => {
 
     context("late game tests", function() {
         before(async function() {
-            for(i = 11; i < 20; i++){
+            /** Initial State:
+             *  - Contract is deployed by the owner and first word "first" start the game
+             *  - 19 words are put in the contract by the first 19 addresses of the dev env
+             *  - the game require one last word to enter in guess mode
+             */
+            this.gartic = await Gartic.new(_firstWord, {from: starterOwner});
+
+            for(i = 2; i < 20; i++){
                 await this.gartic.putNewWord(words[i - 1], {from: accounts[i - 1]});
             }
         })
