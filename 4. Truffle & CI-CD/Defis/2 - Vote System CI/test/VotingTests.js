@@ -130,24 +130,12 @@ contract(Voting, accounts => {
             );
         })
         it("should change the state to: ProposalsRegistrationStarted", async () => {
-            let currentState = await this.voting.workflowStatus.call();
-            const previousStatus = Voting.WorkflowStatus.RegisteringVoters;
-            const expectedNewStatus = Voting.WorkflowStatus.ProposalsRegistrationStarted;
-
-            //verifyng that the state 'previousStatus' to change is correct
-            expect(currentState).to.be.bignumber.equal(new BN(previousStatus));
-
-            //changing the state to the 'expectedNewStatus'
-            let receipt = await this.voting.startProposalsRegistering({from: admin});
-            currentState = await this.voting.workflowStatus.call();
-
-            //verifyng that the current state 'currentState' is changed to the new state 'expectedNewStatus'
-            expectEvent(
-                receipt,
-                'WorkflowStatusChange',
-                {previousStatus: new BN(previousStatus), newStatus: new BN(expectedNewStatus)}
-            );  
-            expect(currentState).to.be.bignumber.equal(new BN(expectedNewStatus));
+            await testStateChange(
+                Voting.WorkflowStatus.RegisteringVoters,
+                Voting.WorkflowStatus.ProposalsRegistrationStarted,
+                this.voting,
+                this.voting.startProposalsRegistering
+                )
         })
         it("should try to create an empty Proposal and revert", async () => {
             let voter1Proposal = "";
@@ -173,6 +161,14 @@ contract(Voting, accounts => {
             let voter1ProposalObject = await this.voting.getOneProposal(newProposalID, {from: voter1});
 
             expect(voter1ProposalObject.description).to.be.equal("My first proposal");
+        })
+        it("should change the state to: ProposalsRegistrationEnded", async () => {
+            await testStateChange(
+                Voting.WorkflowStatus.ProposalsRegistrationStarted,
+                Voting.WorkflowStatus.ProposalsRegistrationEnded,
+                this.voting,
+                this.voting.endProposalsRegistering 
+            )
         })
     })
 
