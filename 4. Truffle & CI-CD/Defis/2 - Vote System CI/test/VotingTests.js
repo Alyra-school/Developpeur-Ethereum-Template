@@ -32,6 +32,42 @@ contract(Voting, accounts => {
         }
     }
 
+    /** 
+     *  @description used to verify if a state is changing as expected
+     *  @dev as we change the state multiples times during the use of the contract,
+     *  this function avoid to write the same tests 3 times with just different states to test
+     *  @param previousState the previous (current when called) state
+     *  @param expectedNewState the new state, expected to be the new current one at the end of function
+     *  @param instance the contract instance to get and set state
+     *  @param stateChangeFn the function to use to set the new state
+     */
+    async function testStateChange(
+        previousState,
+        expectedNewState,
+        instance,
+        stateChangeFn
+        ) {
+            let currentState = await instance.workflowStatus.call();
+
+            //verifyng that the state 'previousState' to change is correct
+            expect(currentState).to.be.bignumber.equal(new BN(previousState));
+
+            //changing the state to the 'expectedNewStatus'
+            let receipt = await stateChangeFn({from: admin});
+            currentState = await instance.workflowStatus.call();
+
+            //verifyng that the current state 'currentState' is changed to the new state 'expectedNewStatus'
+            expectEvent(
+                receipt,
+                'WorkflowStatusChange',
+                {previousStatus: new BN(previousState), newStatus: new BN(expectedNewState)}
+            );  
+            expect(currentState).to.be.bignumber.equal(new BN(expectedNewState));
+        }
+
+
+
+
     /** 'Voters registration' context include all tests about the voters registering step */
     context("Voters registration", () => {
         /** Initial state: 
