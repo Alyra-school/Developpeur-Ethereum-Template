@@ -59,7 +59,7 @@ contract(Voting, accounts => {
             expectEvent(receipt, 'VoterRegistered', {voterAddress: voter1});
         })
         it("should return that voter1 is registered", async () => {
-            let voterObject = await this.voting.getVoter(voter1, {from: voter1});
+            let voterObject = await this.voting.getVoter(voter1);
 
             expect(voterObject.isRegistered).to.equal(true);
         })

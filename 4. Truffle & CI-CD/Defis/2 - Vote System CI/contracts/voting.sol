@@ -54,7 +54,7 @@ contract Voting is Ownable {
         return voters[_addr];
     }
     
-    function getOneProposal(uint _id) external onlyVoters view returns (Proposal memory) {
+    function getOneProposal(uint _id) external view returns (Proposal memory) {
         return proposalsArray[_id];
     }
 
