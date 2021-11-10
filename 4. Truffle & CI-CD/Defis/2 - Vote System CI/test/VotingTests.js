@@ -174,6 +174,41 @@ contract(Voting, accounts => {
 
     /** 'Voting' context include all the tests about the voting step */
     context("Voting", () => {
+        /** Initial state: 
+         * - contract is deployed by the admin address
+         * - voter1, voter2 & voter3 are registered 
+         * - 1 proposal is submitted by each registered voter 
+         * - Proposal registration period ended */
+         before(async () => {
+            this.voting = await Voting.new({from: admin});
+
+            await this.voting.addVoter(voter1, {from: admin});
+            await this.voting.addVoter(voter2, {from: admin});
+            await this.voting.addVoter(voter3, {from: admin});
+
+            await this.voting.startProposalsRegistering({from: admin})
+
+            await this.voting.addProposal("Proposal of voter1", {from: voter1});
+            await this.voting.addProposal("Proposal of voter2", {from: voter2});
+            await this.voting.addProposal("Proposal of voter3", {from: voter3});
+
+            await this.voting.endProposalsRegistering({from: admin});
+        })
+        context("state testing", () => {
+            it("should try to vote and revert", async () => {
+                await expectRevert(
+                    this.voting.setVote(0, {from: voter1}),
+                    "Voting session havent started yet"
+                )
+            })
+            it("should change the state to: VotingSessionStarted", async () => {
+                await testStateChange(
+                    Voting.WorkflowStatus.ProposalsRegistrationEnded,
+                    Voting.WorkflowStatus.VotingSessionStarted,
+                    this.voting,
+                    this.voting.startVotingSession 
+                )
+            })
         //TODO
     })
 
