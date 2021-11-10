@@ -50,24 +50,24 @@ contract(Voting, accounts => {
         expectedNewState,
         instance,
         stateChangeFn
-        ) {
-            let currentState = await instance.workflowStatus.call();
+    ) {
+        let currentState = await instance.workflowStatus.call();
 
-            //verifyng that the state 'previousState' to change is correct
-            expect(currentState).to.be.bignumber.equal(new BN(previousState));
+        //verifyng that the state 'previousState' to change is correct
+        expect(currentState).to.be.bignumber.equal(new BN(previousState));
 
-            //changing the state to the 'expectedNewStatus'
-            let receipt = await stateChangeFn({from: admin});
-            currentState = await instance.workflowStatus.call();
+        //changing the state to the 'expectedNewStatus'
+        let receipt = await stateChangeFn({from: admin});
+        currentState = await instance.workflowStatus.call();
 
-            //verifyng that the current state 'currentState' is changed to the new state 'expectedNewStatus'
-            expectEvent(
-                receipt,
-                'WorkflowStatusChange',
-                {previousStatus: new BN(previousState), newStatus: new BN(expectedNewState)}
-            );  
-            expect(currentState).to.be.bignumber.equal(new BN(expectedNewState));
-        }
+        //verifyng that the current state 'currentState' is changed to the new state 'expectedNewStatus'
+        expectEvent(
+            receipt,
+            'WorkflowStatusChange',
+            {previousStatus: new BN(previousState), newStatus: new BN(expectedNewState)}
+        );  
+        expect(currentState).to.be.bignumber.equal(new BN(expectedNewState));
+    }
 
 
 
