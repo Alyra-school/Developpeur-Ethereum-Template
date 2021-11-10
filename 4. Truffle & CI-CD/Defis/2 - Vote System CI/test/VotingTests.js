@@ -24,7 +24,7 @@ contract(Voting, accounts => {
         let proposals = [];
         try{
             for(let i = 0; true; i++){
-                let proposalObject = await voting.proposalsArray.call(i);
+                let proposalObject = await instance.proposalsArray.call(i);
                 proposals.push(proposalObject);
             } 
         }
@@ -65,7 +65,6 @@ contract(Voting, accounts => {
             );  
             expect(currentState).to.be.bignumber.equal(new BN(expectedNewState));
         }
-
 
 
 
@@ -211,7 +210,8 @@ contract(Voting, accounts => {
                     this.voting.startVotingSession 
                 )
             })
-        //TODO
+            //TODO
+        })
     })
 
     /** 'Ending' context include all the tests about the talling of votes and checking step */
