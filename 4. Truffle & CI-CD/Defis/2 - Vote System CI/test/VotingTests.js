@@ -14,6 +14,9 @@ contract(Voting, accounts => {
     const voter3 = accounts[3];
 
 
+    /* ::::::::::::::: Utils Functions ::::::::::::::: */
+
+    
     /** 
      *  @description as our contract doesn't have any fonction to retrieve the proposals array,
      *  we need to do it manually by calling each elements of the array.
@@ -65,6 +68,12 @@ contract(Voting, accounts => {
             );  
             expect(currentState).to.be.bignumber.equal(new BN(expectedNewState));
         }
+
+
+
+    
+    /* ::::::::::::::: TESTS :::::::::::::::  */
+
 
 
 
