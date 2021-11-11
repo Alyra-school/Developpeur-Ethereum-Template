@@ -39,7 +39,7 @@ contract(Voting, accounts => {
     /** 
      *  @description used to verify if a state is changing as expected
      *  @dev as we change the state multiples times during the use of the contract,
-     *  this function avoid to write the same tests 3 times with just different states to test
+     *  this function avoid to write the same tests multiple times with just different states to test
      *  @param previousState the previous (current when called) state
      *  @param expectedNewState the new state, expected to be the new current one at the end of function
      *  @param instance the contract instance to get and set state
@@ -122,55 +122,59 @@ contract(Voting, accounts => {
             await this.voting.addVoter(voter2, {from: admin});
         })
 
-        it("should try to create a Proposal and revert", async () => {
-            //case where a voter try to submit a proposal before it started
-            let voter1Proposal = "My too early Proposal";
-
-            await expectRevert(
-                this.voting.addProposal(voter1Proposal, {from: voter1}),
-                "Proposals are not allowed yet"
-            );
+        context("state testing", () => {
+            it("should try to create a Proposal and revert", async () => {
+                //case where a voter try to submit a proposal before it started
+                let voter1Proposal = "My too early Proposal";
+    
+                await expectRevert(
+                    this.voting.addProposal(voter1Proposal, {from: voter1}),
+                    "Proposals are not allowed yet"
+                );
+            })
+            /** as we already tested the same function in the 'Voters registration' context,
+             *  we could skip it this time and next time to save time on testing...*/
+            it("should try to change state from non-admin address and revert", async () => {
+                await expectRevert(
+                    this.voting.startProposalsRegistering({from: voter2}),
+                    "Ownable: caller is not the owner"
+                );
+            })
+            it("should change the state to: ProposalsRegistrationStarted", async () => {
+                await testStateChange(
+                    Voting.WorkflowStatus.RegisteringVoters,
+                    Voting.WorkflowStatus.ProposalsRegistrationStarted,
+                    this.voting,
+                    this.voting.startProposalsRegistering
+                    )
+            })
         })
-        /** as we already tested the same function in the 'Voters registration' context,
-         *  we could skip it this time and next time to save time on testing...*/
-        it("should try to change state from non-admin address and revert", async () => {
-            await expectRevert(
-                this.voting.startProposalsRegistering({from: voter2}),
-                "Ownable: caller is not the owner"
-            );
-        })
-        it("should change the state to: ProposalsRegistrationStarted", async () => {
-            await testStateChange(
-                Voting.WorkflowStatus.RegisteringVoters,
-                Voting.WorkflowStatus.ProposalsRegistrationStarted,
-                this.voting,
-                this.voting.startProposalsRegistering
-                )
-        })
-        it("should try to create an empty Proposal and revert", async () => {
-            let voter1Proposal = "";
-
-            await expectRevert(
-                this.voting.addProposal(voter1Proposal, {from: voter1}),
-                "Vous ne pouvez pas ne rien proposer"
-            );
-        })
-        it("should create a new Proposal: My first proposal", async () => {
-            let voter1Proposal = "My first proposal";
-
-            let receipt = await this.voting.addProposal(voter1Proposal, {from: voter1});
-            let proposals = await getProposalsArray(this.voting);
-            let newProposalID = proposals.length - 1;
-            
-            expectEvent(receipt, 'ProposalRegistered', {proposalId: new BN(newProposalID)});
-        })
-        it("should return the good proposal description", async () => {
-            let proposals = await getProposalsArray(this.voting);
-            let newProposalID = proposals.length - 1;
-
-            let voter1ProposalObject = await this.voting.getOneProposal(newProposalID);
-
-            expect(voter1ProposalObject.description).to.be.equal("My first proposal");
+        context("register proposals function testing", () => {
+            it("should try to create an empty Proposal and revert", async () => {
+                let voter1Proposal = "";
+    
+                await expectRevert(
+                    this.voting.addProposal(voter1Proposal, {from: voter1}),
+                    "Vous ne pouvez pas ne rien proposer"
+                );
+            })
+            it("should create a new Proposal: My first proposal", async () => {
+                let voter1Proposal = "My first proposal";
+    
+                let receipt = await this.voting.addProposal(voter1Proposal, {from: voter1});
+                let proposals = await getProposalsArray(this.voting);
+                let newProposalID = proposals.length - 1;
+                
+                expectEvent(receipt, 'ProposalRegistered', {proposalId: new BN(newProposalID)});
+            })
+            it("should return the good proposal description", async () => {
+                let proposals = await getProposalsArray(this.voting);
+                let newProposalID = proposals.length - 1;
+    
+                let voter1ProposalObject = await this.voting.getOneProposal(newProposalID);
+    
+                expect(voter1ProposalObject.description).to.be.equal("My first proposal");
+            })
         })
         it("should change the state to: ProposalsRegistrationEnded", async () => {
             await testStateChange(
