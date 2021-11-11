@@ -175,14 +175,14 @@ contract(Voting, accounts => {
     
                 expect(voter1ProposalObject.description).to.be.equal("My first proposal");
             })
-        })
-        it("should change the state to: ProposalsRegistrationEnded", async () => {
-            await testStateChange(
-                Voting.WorkflowStatus.ProposalsRegistrationStarted,
-                Voting.WorkflowStatus.ProposalsRegistrationEnded,
-                this.voting,
-                this.voting.endProposalsRegistering 
-            )
+            it("should change the state to: ProposalsRegistrationEnded", async () => {
+                await testStateChange(
+                    Voting.WorkflowStatus.ProposalsRegistrationStarted,
+                    Voting.WorkflowStatus.ProposalsRegistrationEnded,
+                    this.voting,
+                    this.voting.endProposalsRegistering 
+                )
+            })
         })
     })
 
@@ -253,14 +253,14 @@ contract(Voting, accounts => {
                 expect(voter1Object.votedProposalId).to.be.equal(idToVote.toString());
                 expect(votedProposalObject.voteCount).to.be.equal('1');
             })
-        })
-        it("should change the state to: VotingSessionEnded", async () => {
-            await testStateChange(
-                Voting.WorkflowStatus.VotingSessionStarted,
-                Voting.WorkflowStatus.VotingSessionEnded,
-                this.voting,
-                this.voting.endVotingSession
-            )
+            it("should change the state to: VotingSessionEnded", async () => {
+                await testStateChange(
+                    Voting.WorkflowStatus.VotingSessionStarted,
+                    Voting.WorkflowStatus.VotingSessionEnded,
+                    this.voting,
+                    this.voting.endVotingSession
+                )
+            })
         })
     })
 
