@@ -223,7 +223,44 @@ contract(Voting, accounts => {
                     this.voting.startVotingSession 
                 )
             })
-            //TODO
+        })
+        context("vote function testing", () => {
+            it("should try to vote and revert", async () => {
+                let possibleProposal = await getProposalsArray(this.voting);
+                let possibleProposalIDs = possibleProposal.length - 1;
+
+                //case where an ID proposal doesn't exist
+                await expectRevert(
+                    this.voting.setVote(possibleProposalIDs + 1, {from: voter1}),
+                    "revert"
+                )
+            })
+            it("should vote from voter1 for Proposal of voter2", async () => {
+                //"Proposal of voter2" is ID 1;
+                let idToVote = 1;
+                
+                let receipt = await this.voting.setVote(1, {from: voter1});
+                let voter1Object = await this.voting.getVoter(voter1, {from: voter1});
+                let votedProposalObject = await this.voting.getOneProposal(idToVote);
+
+                expect(votedProposalObject.description).to.be.equal("Proposal of voter2");
+                expectEvent(
+                    receipt,
+                    'Voted',
+                    {voter: voter1, proposalId: new BN(idToVote)}
+                )
+                expect(voter1Object.hasVoted).to.be.equal(true);
+                expect(voter1Object.votedProposalId).to.be.equal(idToVote.toString());
+                expect(votedProposalObject.voteCount).to.be.equal('1');
+            })
+        })
+        it("should change the state to: VotingSessionEnded", async () => {
+            await testStateChange(
+                Voting.WorkflowStatus.VotingSessionStarted,
+                Voting.WorkflowStatus.VotingSessionEnded,
+                this.voting,
+                this.voting.endVotingSession
+            )
         })
     })
 
