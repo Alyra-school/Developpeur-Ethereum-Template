@@ -58,9 +58,16 @@ contract Voting is Ownable {
         return proposalsArray[_id];
     }
 
-    function getWinner() external view returns (Proposal[] memory) {
+    /**
+    function getWinners() external view returns (Proposal[] memory) {
         require(workflowStatus == WorkflowStatus.VotesTallied, 'Votes are not tallied yet');
         return winningProposals;
+    }
+    */
+
+    function getWinner() external view returns (Proposal memory) {
+        require(workflowStatus == WorkflowStatus.VotesTallied, 'Votes are not tallied yet');
+        return proposalsArray[winningProposalID];
     }
  
     // ::::::::::::: REGISTRATION ::::::::::::: // 
