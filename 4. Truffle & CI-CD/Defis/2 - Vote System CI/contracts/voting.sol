@@ -184,6 +184,10 @@ contract Voting is Ownable {
                 _winningProposalId = p;
             }
         }
+
         winningProposalID = _winningProposalId;
+
+        workflowStatus = WorkflowStatus.VotesTallied;
+        emit WorkflowStatusChange(WorkflowStatus.VotingSessionEnded, WorkflowStatus.VotesTallied);
     }
 }
