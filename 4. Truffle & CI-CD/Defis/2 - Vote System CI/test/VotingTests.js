@@ -110,6 +110,10 @@ contract(Voting, accounts => {
         })
     })
 
+
+
+    
+
     /** 'Proposal registration' context include all tests about the proposal registration step */
     context("Proposal registration", () => {
         /** Initial state: 
@@ -185,6 +189,10 @@ contract(Voting, accounts => {
             })
         })
     })
+
+
+
+
 
     /** 'Voting' context include all the tests about the voting step */
     context("Voting", () => {
@@ -263,6 +271,11 @@ contract(Voting, accounts => {
             })
         })
     })
+
+
+
+
+
 
     /** 'Ending' context include all the tests about the talling of votes and checking step */
     context("Ending", () => {
