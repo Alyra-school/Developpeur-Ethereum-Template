@@ -3,25 +3,51 @@
 pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-
+/** @title A whitelisting voting contract
+    @notice This contract offer a voting system with: 
+            - an admin, the contract owner
+            - voters, with registered address by the admin
+            Voters can first submit differents proposal about a topic.
+            In a second time, Voters can vote one time for their favorite proposal 
+            The proposal with the most votes will be the adopted solution 
+    @author Cyril C. */
 contract Voting is Ownable {
 
     // arrays for draw, uint for single
     // uint[] winningProposalsID;
     Proposal[] winningProposals;
+
+    /** @notice Store the ID of the most voted proposal 
+        @dev will be 0 before 'VoteTailling()' call */
     uint winningProposalID;
     
+    /** @notice Define the structure of a Voter
+        @param isRegistered Define if the voter is in the whitelist 
+        @dev is false by default, true when added to the whitelist with the function 'registerVoter()'
+        @param hasVoted Define if the voter has voted 
+        @dev is false by default, true when the voter voted with 'vote()' 
+        @param votedProposalId Store the ID of the voted proposal */
     struct Voter {
         bool isRegistered;
         bool hasVoted;
         uint votedProposalId;
     }
 
+    /** @notice Define the structure of a Proposal
+        @param description Store the description the proposal 
+        @param voteCount Store the number of voter who voted for the proposal */
     struct Proposal {
         string description;
         uint voteCount;
     }
 
+    /** @notice Define the states possibilities 
+        @param RegisteringVoters State where the admin can add the address as a voter in whitelist 
+        @param ProposalRegistrationStarted State where Voter can register a proposal 
+        @param ProposalRegistrationEnded State where the admin lock the proposal register 
+        @param VotingSessionStarted State where voter can vote for his favorite proposal 
+        @param VotingSessionEnded State where admin end the voting session
+        @param VotesTallied State where the votes are counted and the winner is determined */
     enum  WorkflowStatus {
         RegisteringVoters,
         ProposalsRegistrationStarted,
@@ -31,16 +57,30 @@ contract Voting is Ownable {
         VotesTallied
     }
 
+    /** @notice Define the current state of the Voting */
     WorkflowStatus public workflowStatus;
     Proposal[] public proposalsArray;
+
+    /** @notice Index a 'Voter' to his address */
     mapping (address => Voter) private voters;
 
-
-    event VoterRegistered(address voterAddress); 
+    /** @notice emit when a new voter is registered by the admin
+        @param voterAddress the address of the registered voter */
+    event VoterRegistered(address voterAddress);
+    /** @notice emit when the status is changing
+        @param previousStatus the status before the change
+        @param newStatus the status after the change */
     event WorkflowStatusChange(WorkflowStatus previousStatus, WorkflowStatus newStatus);
+    /** @notice emit when a new proposal is registered by a voter
+        @param proposalId the ID of the new proposal */
     event ProposalRegistered(uint proposalId);
+    /** @notice emit when a voter is voting 
+        @param voter the address of the voter who voted
+        @param proposalId the ID of the proposal which got voted */
     event Voted (address voter, uint proposalId);
 
+
+    /** @notice verify if the sender address is registered as a voter */
     modifier onlyVoters() {
         require(voters[msg.sender].isRegistered, "You're not a voter");
         _;
@@ -50,10 +90,14 @@ contract Voting is Ownable {
 
     // ::::::::::::: GETTERS ::::::::::::: //
 
+    /** @notice Returns the voter object of the given address
+        @param _addr the address of the voter */
     function getVoter(address _addr) external onlyVoters view returns (Voter memory) {
         return voters[_addr];
     }
-    
+
+    /** @notice Returns the proposal object of the given ID
+        @param _id the id of the proposal */
     function getOneProposal(uint _id) external view returns (Proposal memory) {
         return proposalsArray[_id];
     }
@@ -65,6 +109,7 @@ contract Voting is Ownable {
     }
     */
 
+    /** @notice Returns the informations about proposal winner  */
     function getWinner() external view returns (Proposal memory) {
         require(workflowStatus == WorkflowStatus.VotesTallied, 'Votes are not tallied yet');
         return proposalsArray[winningProposalID];
@@ -72,6 +117,8 @@ contract Voting is Ownable {
  
     // ::::::::::::: REGISTRATION ::::::::::::: // 
 
+    /** @notice Admin can register a voter by calling this function
+        @param _addr the address of the whitelisted voter */
     function addVoter(address _addr) public onlyOwner {
         require(workflowStatus == WorkflowStatus.RegisteringVoters, 'Voters registration is not open yet');
         require(voters[_addr].isRegistered != true, 'Already registered');
@@ -90,6 +137,8 @@ contract Voting is Ownable {
 
     // ::::::::::::: PROPOSAL ::::::::::::: // 
 
+    /** @notice Voter can register a new proposal
+        @param _desc the description of the proposal */
     function addProposal(string memory _desc) external onlyVoters {
         require(workflowStatus == WorkflowStatus.ProposalsRegistrationStarted, 'Proposals are not allowed yet');
         require(keccak256(abi.encode(_desc)) != keccak256(abi.encode("")), 'Vous ne pouvez pas ne rien proposer'); // facultatif
@@ -103,6 +152,8 @@ contract Voting is Ownable {
 
     // ::::::::::::: VOTE ::::::::::::: //
 
+    /** @notice Voter can deposit his vote on a proposal 
+        @param _id the ID of the proposal */
     function setVote( uint _id) external onlyVoters {
         require(workflowStatus == WorkflowStatus.VotingSessionStarted, 'Voting session havent started yet');
         require(voters[msg.sender].hasVoted != true, 'You have already voted');
@@ -124,25 +175,28 @@ contract Voting is Ownable {
     *    emit WorkflowStatusChange(pnum, workflowStatus);
         } */ 
 
-
+    /** @notice end the whitelisting period of voters by the admin and start the registering proposals period */
     function startProposalsRegistering() external onlyOwner {
         require(workflowStatus == WorkflowStatus.RegisteringVoters, 'Registering proposals cant be started now');
         workflowStatus = WorkflowStatus.ProposalsRegistrationStarted;
         emit WorkflowStatusChange(WorkflowStatus.RegisteringVoters, WorkflowStatus.ProposalsRegistrationStarted);
     }
 
+    /** @notice end the proposal register period by the admin */
     function endProposalsRegistering() external onlyOwner {
         require(workflowStatus == WorkflowStatus.ProposalsRegistrationStarted, 'Registering proposals havent started yet');
         workflowStatus = WorkflowStatus.ProposalsRegistrationEnded;
         emit WorkflowStatusChange(WorkflowStatus.ProposalsRegistrationStarted, WorkflowStatus.ProposalsRegistrationEnded);
     }
 
+    /** @notice start the vote period by the admin*/
     function startVotingSession() external onlyOwner {
         require(workflowStatus == WorkflowStatus.ProposalsRegistrationEnded, 'Registering proposals phase is not finished');
         workflowStatus = WorkflowStatus.VotingSessionStarted;
         emit WorkflowStatusChange(WorkflowStatus.ProposalsRegistrationEnded, WorkflowStatus.VotingSessionStarted);
     }
 
+    /** @notice end the vote period by the admin */
     function endVotingSession() external onlyOwner {
         require(workflowStatus == WorkflowStatus.VotingSessionStarted, 'Voting session havent started yet');
         workflowStatus = WorkflowStatus.VotingSessionEnded;
@@ -176,6 +230,7 @@ contract Voting is Ownable {
     }
     */
 
+    /** @notice trigger by the admin the vote calculation and define the winner proposal */
     function tallyVotes() external onlyOwner {
         require(workflowStatus == WorkflowStatus.VotingSessionEnded, "Current status is not voting session ended");
         uint _winningProposalId;
