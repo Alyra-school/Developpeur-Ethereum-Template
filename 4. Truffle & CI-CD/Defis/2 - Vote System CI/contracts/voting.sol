@@ -65,19 +65,19 @@ contract Voting is Ownable {
     mapping (address => Voter) private voters;
 
     /** @notice emit when a new voter is registered by the admin
-        @param voterAddress the address of the registered voter */
-    event VoterRegistered(address voterAddress);
+        @param _voterAddress the address of the registered voter */
+    event VoterRegistered(address _voterAddress);
     /** @notice emit when the status is changing
-        @param previousStatus the status before the change
-        @param newStatus the status after the change */
-    event WorkflowStatusChange(WorkflowStatus previousStatus, WorkflowStatus newStatus);
+        @param _previousStatus the status before the change
+        @param _newStatus the status after the change */
+    event WorkflowStatusChange(WorkflowStatus _previousStatus, WorkflowStatus _newStatus);
     /** @notice emit when a new proposal is registered by a voter
-        @param proposalId the ID of the new proposal */
-    event ProposalRegistered(uint proposalId);
+        @param _proposalId the ID of the new proposal */
+    event ProposalRegistered(uint _proposalId);
     /** @notice emit when a voter is voting 
-        @param voter the address of the voter who voted
-        @param proposalId the ID of the proposal which got voted */
-    event Voted (address voter, uint proposalId);
+        @param _voter the address of the voter who voted
+        @param _proposalId the ID of the proposal which got voted */
+    event Voted (address _voter, uint _proposalId);
 
 
     /** @notice verify if the sender address is registered as a voter */
