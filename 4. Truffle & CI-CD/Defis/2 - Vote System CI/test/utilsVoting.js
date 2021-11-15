@@ -61,7 +61,7 @@ module.exports = {
         expectEvent(
             receipt,
             'WorkflowStatusChange',
-            {previousStatus: new BN(previousState), newStatus: new BN(expectedNewState)}
+            {_previousStatus: new BN(previousState), _newStatus: new BN(expectedNewState)}
         );  
         expect(currentState).to.be.bignumber.equal(new BN(expectedNewState));
     }

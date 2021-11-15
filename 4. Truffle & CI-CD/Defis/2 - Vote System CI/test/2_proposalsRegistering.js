@@ -60,7 +60,7 @@ contract("voting.sol", accounts => {
                 let proposals = await getProposalsArray(this.voting);
                 let newProposalID = proposals.length - 1;
                 
-                expectEvent(receipt, 'ProposalRegistered', {proposalId: new BN(newProposalID)});
+                expectEvent(receipt, 'ProposalRegistered', {_proposalId: new BN(newProposalID)});
             })
             it("should return the good proposal description", async () => {
                 let proposals = await getProposalsArray(this.voting);

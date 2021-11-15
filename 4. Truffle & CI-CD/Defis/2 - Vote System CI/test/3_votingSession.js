@@ -66,7 +66,7 @@ contract("voting.sol", accounts => {
                 expectEvent(
                     receipt,
                     'Voted',
-                    {voter: accounts[voter1], proposalId: new BN(idToVote)}
+                    {_voter: accounts[voter1], _proposalId: new BN(idToVote)}
                 )
                 expect(voter1Object.hasVoted).to.be.equal(true);
                 expect(voter1Object.votedProposalId).to.be.equal(idToVote.toString());

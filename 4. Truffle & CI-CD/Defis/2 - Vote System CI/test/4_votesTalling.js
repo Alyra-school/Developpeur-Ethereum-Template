@@ -41,7 +41,7 @@ contract("voting.sol", accounts => {
                 expectEvent(
                     receipt,
                     'WorkflowStatusChange',
-                    {previousStatus: new BN(Voting.WorkflowStatus.VotingSessionEnded), newStatus: new BN(Voting.WorkflowStatus.VotesTallied)}
+                    {_previousStatus: new BN(Voting.WorkflowStatus.VotingSessionEnded), _newStatus: new BN(Voting.WorkflowStatus.VotesTallied)}
                 )
                 expect(winningProposalObject.description).to.be.equal("Proposal of voter3");
                 expect(winningProposalObject.voteCount).to.be.equal('2');

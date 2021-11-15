@@ -29,7 +29,7 @@ contract("voting.sol", accounts => {
         it("should register voter1", async () => {
             let receipt = await this.voting.addVoter(accounts[voter1], {from: accounts[admin]});
 
-            expectEvent(receipt, 'VoterRegistered', {voterAddress: accounts[voter1]});
+            expectEvent(receipt, 'VoterRegistered', {_voterAddress: accounts[voter1]});
         })
         it("should return that voter1 is registered", async () => {
             let voterObject = await this.voting.getVoter(accounts[voter1], {from: accounts[voter1]});
