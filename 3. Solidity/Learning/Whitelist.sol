@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 contract Whitelist {
+	event Authorized(address _address); //Event à déclencher et intercepter dans le front
 	mapping (address => bool) whiteList ;
 	
 	struct Person{ //structure de données
@@ -19,6 +20,7 @@ contract Whitelist {
 	function removePerson() public {
 		persons.pop(); //Retire de le dernier élément de persons
 	}
+
 
 
 }
