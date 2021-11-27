@@ -38,6 +38,11 @@
   justify-content: center;
 }
 
+.registering-infos {
+  align-items: center;
+  justify-content: center;
+}
+
 .button-connect {
   width: 130px;
   height: 60px;

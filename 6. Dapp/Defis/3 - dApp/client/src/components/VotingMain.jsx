@@ -64,7 +64,7 @@ function VotingMain(){
   if(!addressData.isRegistered && !addressData.isOwner) {
     return (
     <div className="not-registered">
-      Only registered voters can access the voting session
+      <h2>Only registered voters can access the voting app !</h2>
     </div>
     )
   }
