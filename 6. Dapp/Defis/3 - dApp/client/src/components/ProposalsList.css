@@ -1,0 +1,25 @@
+.all-proposals {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+table.proposals-table, th, td {
+    border: 1px solid black;
+    width: 75%;
+}
+
+tr {
+    text-align: center; 
+    vertical-align: middle;
+}
+tr.tr-vote {
+    cursor: pointer;
+}
+
+tr.tr-vote:hover {
+    cursor: pointer;
+    background-color: grey;
+    color: white;
+}

@@ -1,0 +1,12 @@
+.registering-proposal-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 7%;
+}
+
+input {
+    width: 75%;
+    margin-bottom: 2%;
+}
