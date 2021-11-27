@@ -16,3 +16,7 @@
 button {
     margin-bottom: 10%;
 }
+
+input.register-voter {
+    width: 250px;
+}

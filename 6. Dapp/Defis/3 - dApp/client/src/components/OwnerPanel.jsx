@@ -71,10 +71,10 @@ const OwnerPanel = () => {
                     <div className='status-change-panel'>
                         <h2>Owner panel</h2>
                         <div className="registering-voter-panel">
-                            <input ref={inputAddress} maxLength='42'placeholder='Address to register'></input>
+                            <input className="register-voter" ref={inputAddress} maxLength='42'placeholder='Address to register'></input>
                             <button onClick={registerVoter}>Register</button>
                             <div className="registering-infos">
-                            {   registeringMsg}
+                            {registeringMsg}
                             </div>
                         </div>
                         <button onClick={changeworkflowStatus.bind(this, contract.methods.startProposalsRegistering)}>Start proposals registering</button>

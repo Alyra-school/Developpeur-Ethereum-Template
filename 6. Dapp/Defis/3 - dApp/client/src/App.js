@@ -18,7 +18,7 @@ function App(){
           const web3 = new Web3(window.ethereum);
           
           try {
-            const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
             const networkId = await web3.eth.net.getId();
             const deployedNetwork = VotingContract.networks[networkId];
 
