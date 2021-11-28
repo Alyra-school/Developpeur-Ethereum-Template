@@ -21,6 +21,9 @@ contract Whitelist {
 		persons.pop(); //Retire de le dernier élément de persons
 	}
 
-
+	function authorize(address _address) public {
+		whiteList[_address] = true;
+		emit Authorized(_address);
+	}
 
 }
