@@ -1,0 +1,17 @@
+{
+  "name": "2---vote-system-ci",
+  "version": "1.0.0",
+  "description": "Second part of Voting Alyra Defi",
+  "main": "truffle-config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Loïs L.",
+  "license": "MIT",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.3.2",
+    "@openzeppelin/test-helpers": "^0.5.15",
+    "truffle": "^5.4.18"
+  }
+}

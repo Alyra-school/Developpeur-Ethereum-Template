@@ -1,0 +1,16 @@
+.previous-register {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: solid;
+}
+
+.registered-list {
+    list-style-type: none;
+    justify-content: center;
+}
+
+.registered-list-element {
+    margin-right: 30px;
+}
