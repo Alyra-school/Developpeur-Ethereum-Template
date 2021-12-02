@@ -30,6 +30,8 @@ contract Voting is Ownable{
         VotesTallied
     }
 
+    WorkflowStatus private status;
+
     struct Voter {
         bool isRegistered;
         bool hasVoted;
@@ -41,31 +43,81 @@ contract Voting is Ownable{
         uint voteCount;
     }
 
-    event WhiteListed (address _address);
-    event BlackListed (address _address);
+    mapping (address => Voter) private comptesWL;
+    mapping (uint => Proposal) private listProposal;
+    uint public proposalId = 0;
+    
+    /*
+    *
+    *   1) L'administrateur du vote enregistre une liste blanche d'électeurs identifiés par leur adresse Ethereum.
+    *
+    */
+    function registeringWL(address _address) public onlyOwner{
+        require(!comptesWL[_address].isRegistered,"Already registered in the whitelist my dear");
+        
+        //Prevoir de démarrer une campagne de vote, si elle existe déjà etc.
 
-    mapping (address => bool) private comptesWL;
-    mapping (address => bool) private comptesBL;
+        emit WorkflowStatusChange (getEnumStatus(),WorkflowStatus.RegisteringVoters);
 
-    /*1) L'administrateur du vote enregistre une liste blanche d'électeurs identifiés par leur adresse Ethereum.*/
-    function whitelist(address _address) public onlyOwner{
-        require(!comptesWL[_address],"Already in the whitelist my dear");
-        //Màj status enum
+        //Création d'un Voter via Structure & Màj Whitelist address => struct
+        Voter storage vote = comptesWL[_address];
+        vote.isRegistered = true;
+        vote.hasVoted = false;
 
-        //Création d'un Voter via Structure
-        //Màj Whitelist address => struct
-        comptesWL[_address] = true;
-        emit WhiteListed(_address);
-        emit VoterRegistered(_address); //Event électeur enregistré
+        //Event électeur enregistré
+        emit VoterRegistered(_address);
     }
 
-    function isWhiteListed(address _address) public view returns(bool){
-        return comptesWL[_address];
+    /* 
+    *
+    * 2) L'administrateur du vote commence la session d'enregistrement de la proposition.
+    *
+    */
+    function startingProposalSession() public onlyOwner{
+        //On a bien déjà démarré l'enregistrement des électeurs
+        require(getEnumStatus() == WorkflowStatus.RegisteringVoters);
+        //Changement de status
+        emit WorkflowStatusChange(getEnumStatus(),WorkflowStatus.ProposalsRegistrationStarted);
     }
 
-    function isBlackListed(address _address) public view returns(bool){
-        return comptesBL[_address];
+    /* 
+    *
+    *   3) Les électeurs inscrits sont autorisés à enregistrer leurs propositions pendant que la session d'enregistrement est active.
+    *
+    */
+    function registeringProposal(string memory _description) public{
+        proposalId++;
+        listProposal[proposalId] = Proposal(_description,0);
+        //TODO Que se passe-t-il si plusieurs propositions sont les mêmes ?
+        emit ProposalRegistered(proposalId);
     }
+
+    /* 
+    *
+    *   4) L'administrateur de vote met fin à la session d'enregistrement des propositions.
+    *
+    */
+    function endingProposalSession() public onlyOwner{
+        //On avait bien démarré la session de proposal
+        require(getEnumStatus() == WorkflowStatus.ProposalsRegistrationStarted);
+        //Changement de status
+        emit WorkflowStatusChange(getEnumStatus(),WorkflowStatus.ProposalsRegistrationEnded);
+    }
+
+  /* 
+    *
+    *   5) L'administrateur du vote commence la session de vote.
+    *
+    */
+    function startingVotingSession() public onlyOwner{
+        //On a bien fini la session de registration des proposals
+        require(getEnumStatus() == WorkflowStatus.ProposalsRegistrationEnded);
+        //On a au moins une proposition, sinon on vote pour rien
+        require(proposalId >= 1);
+        //Changement de status
+        emit WorkflowStatusChange(getEnumStatus(),WorkflowStatus.VotingSessionStarted);
+    }
+
 
     function winningProposalId() public pure returns(uint){
         return 1;
@@ -73,5 +125,9 @@ contract Voting is Ownable{
 
     function getWinner() public pure returns(uint){
         return 1;
+    }
+
+    function getEnumStatus() private view returns(WorkflowStatus){
+        return status;
     }
 }
