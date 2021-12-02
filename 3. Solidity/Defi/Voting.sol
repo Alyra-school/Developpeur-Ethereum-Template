@@ -75,7 +75,7 @@ contract Voting is Ownable{
     */
     function startingProposalSession() public onlyOwner{
         //On a bien déjà démarré l'enregistrement des électeurs
-        require(getEnumStatus() == WorkflowStatus.RegisteringVoters);
+        require(getEnumStatus() == WorkflowStatus.RegisteringVoters,"Registering of Voters isnt started yet");
         //Changement de status
         emit WorkflowStatusChange(getEnumStatus(),WorkflowStatus.ProposalsRegistrationStarted);
     }
@@ -99,23 +99,37 @@ contract Voting is Ownable{
     */
     function endingProposalSession() public onlyOwner{
         //On avait bien démarré la session de proposal
-        require(getEnumStatus() == WorkflowStatus.ProposalsRegistrationStarted);
+        require(getEnumStatus() == WorkflowStatus.ProposalsRegistrationStarted,"Registering proposal isn't started yet");
         //Changement de status
         emit WorkflowStatusChange(getEnumStatus(),WorkflowStatus.ProposalsRegistrationEnded);
     }
 
-  /* 
+    /* 
     *
     *   5) L'administrateur du vote commence la session de vote.
     *
     */
     function startingVotingSession() public onlyOwner{
         //On a bien fini la session de registration des proposals
-        require(getEnumStatus() == WorkflowStatus.ProposalsRegistrationEnded);
+        require(getEnumStatus() == WorkflowStatus.ProposalsRegistrationEnded,"Registering proposal isn't finished yet");
         //On a au moins une proposition, sinon on vote pour rien
-        require(proposalId >= 1);
+        require(proposalId >= 1,"Not enough proposition to start a vote");
         //Changement de status
         emit WorkflowStatusChange(getEnumStatus(),WorkflowStatus.VotingSessionStarted);
+    }
+
+    /* 
+    *
+    *   6) Les électeurs inscrits votent pour leurs propositions préférées.
+    *
+    */
+    function votingFor(uint _proposalId) public view returns(uint){
+        //la session de vote a démarré
+        require(getEnumStatus() == WorkflowStatus.VotingSessionStarted,"Voting session isn't started yet");
+        //Droit de voter de msg.sender
+        //Mise à jour du "à voter"
+        //listProposal[proposalId]
+        return _proposalId;
     }
 
 
