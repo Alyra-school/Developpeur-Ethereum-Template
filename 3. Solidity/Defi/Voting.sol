@@ -123,13 +123,17 @@ contract Voting is Ownable{
     *   6) Les électeurs inscrits votent pour leurs propositions préférées.
     *
     */
-    function votingFor(uint _proposalId) public view returns(uint){
+    function votingFor(uint _proposalId) public returns(Voter){
         //la session de vote a démarré
         require(getEnumStatus() == WorkflowStatus.VotingSessionStarted,"Voting session isn't started yet");
         //Droit de voter de msg.sender
+        require(comptesWL[msg.sender].isRegistered && comptesWL[msg.sender].hasVoted == false,"You are not allowed to vote or you already voted");        
+        //Tester que le _proposalId existe vraiment
+        require(proposalId >= _proposalId,"Proposal wished doesnt exist");
         //Mise à jour du "à voter"
-        //listProposal[proposalId]
-        return _proposalId;
+        comptesWL[msg.sender].hasVoted = true;
+        comptesWL[msg.sender].votedProposalId = _proposalId;
+        return comptesWL[msg.sender];
     }
 
 
