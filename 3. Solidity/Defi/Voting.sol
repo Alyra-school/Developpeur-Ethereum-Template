@@ -54,7 +54,7 @@ contract Voting is Ownable{
     *   1) L'administrateur du vote enregistre une liste blanche d'électeurs identifiés par leur adresse Ethereum.
     *
     */
-    function registeringWL(address _address) public onlyOwner{
+    function registeringUniqueAd(address _address) public onlyOwner{
         require(!comptesWL[_address].isRegistered,"Already registered in the whitelist my dear");
         
         //Prevoir de démarrer une campagne de vote, si elle existe déjà etc.
@@ -73,17 +73,24 @@ contract Voting is Ownable{
         emit VoterRegistered(_address);
     }
 
-/*
+    /*
+    *
+    *   1) L'administrateur du vote enregistre une liste blanche d'électeurs identifiés par leur adresse Ethereum.
+    *
+    */
     function registeringWL(address[] memory arrayWL) public onlyOwner{
-        //Aucune adresse déjà existante
+        emit WorkflowStatusChange (wfStatus,WorkflowStatus.RegisteringVoters);
+        wfStatus = WorkflowStatus.RegisteringVoters;
+
         Voter memory vote;
         for(uint i=0;i<arrayWL.length;i++){
             vote = Voter(true,false,0);
+            //Si l'adresse est déjà existante on écrase
             comptesWL[arrayWL[i]] = vote;
             emit VoterRegistered(arrayWL[i]);
         }
     }
-*/
+
     /* 
     *
     * 2) L'administrateur du vote commence la session d'enregistrement de la proposition.
