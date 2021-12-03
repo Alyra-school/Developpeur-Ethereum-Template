@@ -109,7 +109,7 @@ contract Voting is Ownable{
     *   5) L'administrateur du vote commence la session de vote.
     *
     */
-    function startingVotingSession() public onlyOwner{
+    function startVotingSession() public onlyOwner{
         //On a bien fini la session de registration des proposals
         require(getEnumStatus() == WorkflowStatus.ProposalsRegistrationEnded,"Registering proposal isn't finished yet");
         //On a au moins une proposition, sinon on vote pour rien
@@ -123,19 +123,40 @@ contract Voting is Ownable{
     *   6) Les électeurs inscrits votent pour leurs propositions préférées.
     *
     */
-    function votingFor(uint _proposalId) public returns(comptesWL){
+    function votingFor(uint _proposalId) public{
         //la session de vote a démarré
         require(getEnumStatus() == WorkflowStatus.VotingSessionStarted,"Voting session isn't started yet");
         //Droit de voter de msg.sender
         require(comptesWL[msg.sender].isRegistered && comptesWL[msg.sender].hasVoted == false,"You are not allowed to vote or you already voted");        
         //Tester que le _proposalId existe vraiment
         require(proposalId >= _proposalId,"Proposal wished doesnt exist");
-        //Mise à jour du "à voter"
 
-        Voter memory voter = Voter(true,true,_proposalId);
-        comptesWL[msg.sender] = voter;
-        return comptesWL[msg.sender];
+        //Mise à jour du "à voter"
+        comptesWL[msg.sender].hasVoted = true;
+        comptesWL[msg.sender].votedProposalId = _proposalId;
+
+        //Mise à jour du count de vote pour la proposition votée
+        listProposal[_proposalId].voteCount++;
+
+        //emit
+        emit Voted(msg.sender,_proposalId);
     }
+
+
+    /* 
+    *
+    *   7) L'administrateur du vote met fin à la session de vote.
+    *
+    */
+    function endVotingSession() public{
+        //On a bien fini démarré la session de vote
+        require(getEnumStatus() == WorkflowStatus.VotingSessionStarted,"Voting isn't started yet");
+        //On a au moins un vote
+        require(proposalId >= 1,"Not enough proposition to start a vote");
+        //Changement de status
+        emit WorkflowStatusChange(getEnumStatus(),WorkflowStatus.VotingSessionStarted);
+    }
+
 
 
     function winningProposalId() public pure returns(uint){
