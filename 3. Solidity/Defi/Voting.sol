@@ -30,7 +30,7 @@ contract Voting is Ownable{
         VotesTallied
     }
 
-    WorkflowStatus private status;
+    WorkflowStatus public wfStatus;
 
     struct Voter {
         bool isRegistered;
@@ -46,6 +46,8 @@ contract Voting is Ownable{
     mapping (address => Voter) private comptesWL;
     mapping (uint => Proposal) private listProposal;
     uint public proposalId = 0;
+    uint private _winningProposalId;
+    
     
     /*
     *
@@ -57,17 +59,31 @@ contract Voting is Ownable{
         
         //Prevoir de démarrer une campagne de vote, si elle existe déjà etc.
 
-        emit WorkflowStatusChange (getEnumStatus(),WorkflowStatus.RegisteringVoters);
+        emit WorkflowStatusChange (wfStatus,WorkflowStatus.RegisteringVoters);
+        wfStatus = WorkflowStatus.RegisteringVoters;
 
         //Création d'un Voter via Structure & Màj Whitelist address => struct
-        Voter storage vote = comptesWL[_address];
+        Voter memory vote;
         vote.isRegistered = true;
         vote.hasVoted = false;
+
+        comptesWL[_address] = vote;
 
         //Event électeur enregistré
         emit VoterRegistered(_address);
     }
 
+/*
+    function registeringWL(address[] memory arrayWL) public onlyOwner{
+        //Aucune adresse déjà existante
+        Voter memory vote;
+        for(uint i=0;i<arrayWL.length;i++){
+            vote = Voter(true,false,0);
+            comptesWL[arrayWL[i]] = vote;
+            emit VoterRegistered(arrayWL[i]);
+        }
+    }
+*/
     /* 
     *
     * 2) L'administrateur du vote commence la session d'enregistrement de la proposition.
@@ -75,9 +91,10 @@ contract Voting is Ownable{
     */
     function startingProposalSession() public onlyOwner{
         //On a bien déjà démarré l'enregistrement des électeurs
-        require(getEnumStatus() == WorkflowStatus.RegisteringVoters,"Registering of Voters isnt started yet");
+        require(wfStatus == WorkflowStatus.RegisteringVoters,"Registering of Voters isnt started yet");
         //Changement de status
-        emit WorkflowStatusChange(getEnumStatus(),WorkflowStatus.ProposalsRegistrationStarted);
+        emit WorkflowStatusChange(wfStatus,WorkflowStatus.ProposalsRegistrationStarted);
+        wfStatus = WorkflowStatus.ProposalsRegistrationStarted;
     }
 
     /* 
@@ -86,8 +103,8 @@ contract Voting is Ownable{
     *
     */
     function registeringProposal(string memory _description) public{
-        proposalId++;
         listProposal[proposalId] = Proposal(_description,0);
+        proposalId++;
         //TODO Que se passe-t-il si plusieurs propositions sont les mêmes ?
         emit ProposalRegistered(proposalId);
     }
@@ -99,9 +116,10 @@ contract Voting is Ownable{
     */
     function endingProposalSession() public onlyOwner{
         //On avait bien démarré la session de proposal
-        require(getEnumStatus() == WorkflowStatus.ProposalsRegistrationStarted,"Registering proposal isn't started yet");
+        require(wfStatus == WorkflowStatus.ProposalsRegistrationStarted,"Registering proposal isn't started yet");
         //Changement de status
-        emit WorkflowStatusChange(getEnumStatus(),WorkflowStatus.ProposalsRegistrationEnded);
+        emit WorkflowStatusChange(wfStatus,WorkflowStatus.ProposalsRegistrationEnded);
+        wfStatus = WorkflowStatus.ProposalsRegistrationEnded;
     }
 
     /* 
@@ -111,11 +129,12 @@ contract Voting is Ownable{
     */
     function startVotingSession() public onlyOwner{
         //On a bien fini la session de registration des proposals
-        require(getEnumStatus() == WorkflowStatus.ProposalsRegistrationEnded,"Registering proposal isn't finished yet");
+        require(wfStatus == WorkflowStatus.ProposalsRegistrationEnded,"Registering proposal isn't finished yet");
         //On a au moins une proposition, sinon on vote pour rien
         require(proposalId >= 1,"Not enough proposition to start a vote");
         //Changement de status
-        emit WorkflowStatusChange(getEnumStatus(),WorkflowStatus.VotingSessionStarted);
+        emit WorkflowStatusChange(wfStatus,WorkflowStatus.VotingSessionStarted);
+        wfStatus = WorkflowStatus.VotingSessionStarted;
     }
 
     /* 
@@ -125,7 +144,7 @@ contract Voting is Ownable{
     */
     function votingFor(uint _proposalId) public{
         //la session de vote a démarré
-        require(getEnumStatus() == WorkflowStatus.VotingSessionStarted,"Voting session isn't started yet");
+        require(wfStatus == WorkflowStatus.VotingSessionStarted,"Voting session isn't started yet");
         //Droit de voter de msg.sender
         require(comptesWL[msg.sender].isRegistered && comptesWL[msg.sender].hasVoted == false,"You are not allowed to vote or you already voted");        
         //Tester que le _proposalId existe vraiment
@@ -148,26 +167,39 @@ contract Voting is Ownable{
     *   7) L'administrateur du vote met fin à la session de vote.
     *
     */
-    function endVotingSession() public{
-        //On a bien fini démarré la session de vote
-        require(getEnumStatus() == WorkflowStatus.VotingSessionStarted,"Voting isn't started yet");
+    function endVotingSession() public onlyOwner{
+        //On a bien démarré la session de vote
+        require(wfStatus == WorkflowStatus.VotingSessionStarted,"Voting isn't started yet, can't close it");
         //On a au moins un vote
-        require(proposalId >= 1,"Not enough proposition to start a vote");
+        require(proposalId >= 1,"Not enough proposition to close the voting session");
         //Changement de status
-        emit WorkflowStatusChange(getEnumStatus(),WorkflowStatus.VotingSessionStarted);
+        emit WorkflowStatusChange(wfStatus,WorkflowStatus.VotingSessionEnded);
+        wfStatus = WorkflowStatus.VotingSessionEnded;
     }
 
 
+    /* 
+    *
+    *   8) L'administrateur du vote comptabilise les votes.
+    *
+    */
+    function countVote() public onlyOwner{
+        require(wfStatus == WorkflowStatus.VotingSessionEnded,"Voting isn't finished yet");
+        uint maxCount=listProposal[0].voteCount;
+        for(uint i = 1;i<proposalId;i++){
+            if(listProposal[i].voteCount > maxCount){
+                maxCount = listProposal[i].voteCount;
+                _winningProposalId = i;
+            }
+        }
+    }
 
-    function winningProposalId() public pure returns(uint){
-        return 1;
+    function winningProposalId() public view returns(uint){
+        return _winningProposalId;
     }
 
     function getWinner() public pure returns(uint){
         return 1;
     }
 
-    function getEnumStatus() private view returns(WorkflowStatus){
-        return status;
-    }
 }
