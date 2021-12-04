@@ -199,14 +199,25 @@ contract Voting is Ownable{
                 _winningProposalId = i;
             }
         }
+        //Changement de status
+        emit WorkflowStatusChange(wfStatus,WorkflowStatus.VotingSessionEnded);
+        wfStatus = WorkflowStatus.VotesTallied;
     }
 
     function winningProposalId() public view returns(uint){
+        require(wfStatus == WorkflowStatus.VotesTallied,"Vote counting isn't finished yet");
         return _winningProposalId;
     }
 
-    function getWinner() public pure returns(uint){
-        return 1;
+
+    /* 
+    *
+    *   9) Tout le monde peut vérifier les derniers détails de la proposition gagnante.
+    *
+    */
+    function getWinner() public view returns(string memory){
+        require(wfStatus == WorkflowStatus.VotesTallied,"Vote counting isn't finished yet");
+        return listProposal[winningProposalId()].description;
     }
 
 }
