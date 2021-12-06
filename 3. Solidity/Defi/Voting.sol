@@ -48,7 +48,36 @@ contract Voting is Ownable{
     uint public proposalId = 0;
     uint private _winningProposalId;
     
+
+    /**
+    * TODO :
+    * RegisteringProposal : vérifier l'address bien présente dans la whitelist
+    * Pour voter il faut accéder à la liste des propositions
+    */
     
+modifier atStage(WorkflowStatus _status) {
+   require(
+       wfStatus == _status,
+       "Function cannot be called at this time."
+   );
+   _;
+}
+// Go to the next stage after the function is done.
+modifier transitionNext() {
+   _;
+   nextStage();
+}
+
+function nextStage() internal {
+   wfStatus = WorkflowStatus(uint(wfStatus) + 1);
+}
+
+// Order of the modifiers matters here!
+function bid() public payable atStage(WorkflowStatus.RegisteringVoters) {
+        
+   // We will not implement that here
+}
+
     /*
     *
     *   1) L'administrateur du vote enregistre une liste blanche d'électeurs identifiés par leur adresse Ethereum.
@@ -56,6 +85,8 @@ contract Voting is Ownable{
     */
     function registeringUniqueAd(address _address) public onlyOwner{
         require(!comptesWL[_address].isRegistered,"Already registered in the whitelist my dear");
+        //On a bien déjà démarré l'enregistrement des électeurs
+        require(wfStatus == WorkflowStatus.RegisteringVoters,"Registering of Voters isnt started yet");
         
         //Prevoir de démarrer une campagne de vote, si elle existe déjà etc.
 
@@ -110,6 +141,7 @@ contract Voting is Ownable{
     *
     */
     function registeringProposal(string memory _description) public{
+        
         listProposal[proposalId] = Proposal(_description,0);
         proposalId++;
         //TODO Que se passe-t-il si plusieurs propositions sont les mêmes ?
@@ -153,7 +185,7 @@ contract Voting is Ownable{
         //la session de vote a démarré
         require(wfStatus == WorkflowStatus.VotingSessionStarted,"Voting session isn't started yet");
         //Droit de voter de msg.sender
-        require(comptesWL[msg.sender].isRegistered && comptesWL[msg.sender].hasVoted == false,"You are not allowed to vote or you already voted");        
+        require(comptesWL[msg.sender].isRegistered && (comptesWL[msg.sender].hasVoted == false),"You are not allowed to vote or you already voted");        
         //Tester que le _proposalId existe vraiment
         require(proposalId >= _proposalId,"Proposal wished doesnt exist");
 
