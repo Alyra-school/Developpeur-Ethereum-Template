@@ -30,7 +30,7 @@ contract Voting is Ownable{
         VotesTallied
     }
 
-    WorkflowStatus public wfStatus;
+    WorkflowStatus public wfStatus = WorkflowStatus.RegisteringVoters;
 
     struct Voter {
         bool isRegistered;
@@ -55,51 +55,37 @@ contract Voting is Ownable{
     * Pour voter il faut accéder à la liste des propositions
     */
     
-modifier atStage(WorkflowStatus _status) {
-   require(
-       wfStatus == _status,
-       "Function cannot be called at this time."
-   );
-   _;
-}
-// Go to the next stage after the function is done.
-modifier transitionNext() {
-   _;
-   nextStage();
-}
+    modifier atStage(WorkflowStatus _status) {
+        require(
+            wfStatus == _status,
+            "Function cannot be called at this time."
+        );
+        _;
+    }
+    // Go to the next stage after the function is done.
+    /*modifier transitionNext() {
+        _;
+        nextStage();
+    }*/
 
-function nextStage() internal {
-   wfStatus = WorkflowStatus(uint(wfStatus) + 1);
-}
-
-// Order of the modifiers matters here!
-function bid() public payable atStage(WorkflowStatus.RegisteringVoters) {
-        
-   // We will not implement that here
-}
+    function nextStage() internal {
+        WorkflowStatus newStatus = WorkflowStatus(uint(wfStatus) + 1);
+        emit WorkflowStatusChange(wfStatus,newStatus);
+        wfStatus = newStatus;
+    }
 
     /*
     *
     *   1) L'administrateur du vote enregistre une liste blanche d'électeurs identifiés par leur adresse Ethereum.
     *
     */
-    function registeringUniqueAd(address _address) public onlyOwner{
+    function registeringUniqueAd(address _address) public onlyOwner atStage(WorkflowStatus.RegisteringVoters){
         require(!comptesWL[_address].isRegistered,"Already registered in the whitelist my dear");
-        //On a bien déjà démarré l'enregistrement des électeurs
-        require(wfStatus == WorkflowStatus.RegisteringVoters,"Registering of Voters isnt started yet");
-        
-        //Prevoir de démarrer une campagne de vote, si elle existe déjà etc.
-
-        emit WorkflowStatusChange (wfStatus,WorkflowStatus.RegisteringVoters);
-        wfStatus = WorkflowStatus.RegisteringVoters;
-
         //Création d'un Voter via Structure & Màj Whitelist address => struct
         Voter memory vote;
         vote.isRegistered = true;
         vote.hasVoted = false;
-
         comptesWL[_address] = vote;
-
         //Event électeur enregistré
         emit VoterRegistered(_address);
     }
@@ -109,10 +95,7 @@ function bid() public payable atStage(WorkflowStatus.RegisteringVoters) {
     *   1) L'administrateur du vote enregistre une liste blanche d'électeurs identifiés par leur adresse Ethereum.
     *
     */
-    function registeringWL(address[] memory arrayWL) public onlyOwner{
-        emit WorkflowStatusChange (wfStatus,WorkflowStatus.RegisteringVoters);
-        wfStatus = WorkflowStatus.RegisteringVoters;
-
+    function registeringWL(address[] memory arrayWL) public onlyOwner atStage(WorkflowStatus.RegisteringVoters){
         Voter memory vote;
         for(uint i=0;i<arrayWL.length;i++){
             vote = Voter(true,false,0);
@@ -127,12 +110,9 @@ function bid() public payable atStage(WorkflowStatus.RegisteringVoters) {
     * 2) L'administrateur du vote commence la session d'enregistrement de la proposition.
     *
     */
-    function startingProposalSession() public onlyOwner{
-        //On a bien déjà démarré l'enregistrement des électeurs
-        require(wfStatus == WorkflowStatus.RegisteringVoters,"Registering of Voters isnt started yet");
-        //Changement de status
-        emit WorkflowStatusChange(wfStatus,WorkflowStatus.ProposalsRegistrationStarted);
-        wfStatus = WorkflowStatus.ProposalsRegistrationStarted;
+    function startingProposalSession() public onlyOwner atStage(WorkflowStatus.RegisteringVoters){
+        //WL terminée, on passe à l'étape d'apès
+        nextStage();
     }
 
     /* 
@@ -140,7 +120,7 @@ function bid() public payable atStage(WorkflowStatus.RegisteringVoters) {
     *   3) Les électeurs inscrits sont autorisés à enregistrer leurs propositions pendant que la session d'enregistrement est active.
     *
     */
-    function registeringProposal(string memory _description) public{
+    function registeringProposal(string memory _description) public atStage(WorkflowStatus.ProposalsRegistrationStarted){
         
         listProposal[proposalId] = Proposal(_description,0);
         proposalId++;
