@@ -31,4 +31,19 @@ truffle deploy
 
 # Compilation + déploiement
 truffle migrate
+
+# En cas d'erreur
+truffle migrate --reset
+```
+
+### Console truffle
+```bash
+# Lancer la console
+truffle console
+
+# Possibilité de choisir le network
+truffle console --network ropsten
+
+# Récupérer l'instance du contrat déployé
+const instance = await SimpleStorage.deployed()
 ```
