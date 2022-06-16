@@ -68,3 +68,24 @@ npm install --save dotenv
 - INFURA_ID = api keya
 - MNEMONIC = passphrase
 
+### Configurer le nouveau réseau dans truffle-config.js
+```js
+// Import de hdwallet et dotenv
+const HDWalletProvider = require('@truffle/hdwallet-provider'); 
+require('dotenv').config();
+
+// Dans networks
+ropsten:{
+    provider : function () {
+    return new HDWalletProvider({
+        mnemonic:{phrase:`${process.env.MNEMONIC}`},
+        providerOrUrl:`https://ropsten.infura.io/v3/${process.env.INFURA_ID}`
+    })},
+    network_id:3,
+},
+```
+
+### Déploiement sur le réseau Ropsten
+```bash
+truffle migrate --network ropsten
+```
