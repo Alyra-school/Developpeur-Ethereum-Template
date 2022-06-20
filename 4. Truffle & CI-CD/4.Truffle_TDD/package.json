@@ -1,5 +1,5 @@
 {
-  "name": "3.truffle_ropsten_deploy",
+  "name": "truffle_TDD",
   "version": "1.0.0",
   "description": "",
   "main": "truffle-config.js",
@@ -7,12 +7,13 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@openzeppelin/contracts": "^4.6.0",
     "@truffle/hdwallet-provider": "^2.0.9",
     "dotenv": "^16.0.1"
   }
