@@ -1,91 +1,77 @@
-# Découverte de Truffle
-### Truffle est un framework de développement.
-https://trufflesuite.com/docs/truffle/
-___
+# Tests unitaires, CI/CD
+Tester le bon fonctionnement d'une partie précise d'un programme
 
-### Installation et initialisation
+## Test d'intégrations avec Truffle, Mocha et Chai
+Truffle utilise Mocha pour les tests et Chai pour les assertions
+- [Mocha](https://mochajs.org/api/)
+- [Chai](https://www.chaijs.com/api/)
+
+Les tests doivent être écrits en .js et dans le repértoire ./test.
+Le code sera reconnu par Mocha comme un test automatisé.
+
 ```bash
-# Installer truffle
-npm install -g truffle
+# Les tests pourront être lancé avec
+truffle test
 
-# Version installée
-truffle version
+# Choisir le test
+truffle test test/testfile.js
 
-# Initialiser un projet
-truffle init
+# Possibilité de choisir le réseau avec
+truffle --network <nom du réseau>
 ```
 
-### Configuration
-Dans le fichier truffle-config.js, dé-commenter le network de développement.
+---
 
-### Compilation et déploiement sur Ganache
-```bash
-# Lancer ganache avec mnemonic
-ganache -m
+## Truffle
+- [artifacts.require](https://trufflesuite.com/docs/truffle/getting-started/running-migrations/#artifactsrequire)
 
-# Compilation
-truffle compile
-
-# Déploiement
-truffle deploy
-
-# Compilation + déploiement
-truffle migrate
-
-# En cas d'erreur
-truffle migrate --reset
-```
-
-### Console truffle
-```bash
-# Lancer la console
-truffle console
-
-# Possibilité de choisir le network
-truffle console --network ropsten
-
-# Récupérer l'instance du contrat déployé
-const instance = await SimpleStorage.deployed()
-```
-
-### Wallet CLI
-Rendre notre wallet disponible dans Truffle pour communiquer avec les blockchains
-```bash
-# HD Wallet provider, produit par ConcenSys
-npm install @truffle/hdwallet-provider
-```
-
-### Provider RPC
-Plateforme permettant l'accès aux blockchains, permet une connexion au réseau sans avoir besoin de son propre noeud.
-
-Utilisation de Infura : https://infura.io/
-
-### Dotenv
-```bash
-# Pouvoir utiliser des variables d'environnements, à mettre dans gitignore .env
-npm install --save dotenv
-```
-- INFURA_ID = api keya
-- MNEMONIC = passphrase
-
-### Configurer le nouveau réseau dans truffle-config.js
+  - Indiquer avec quel contrat intéragir
 ```js
-// Import de hdwallet et dotenv
-const HDWalletProvider = require('@truffle/hdwallet-provider'); 
-require('dotenv').config();
-
-// Dans networks
-ropsten:{
-    provider : function () {
-    return new HDWalletProvider({
-        mnemonic:{phrase:`${process.env.MNEMONIC}`},
-        providerOrUrl:`https://ropsten.infura.io/v3/${process.env.INFURA_ID}`
-    })},
-    network_id:3,
-},
+const SimpleStorage = artifacts.require("SimpleStorage");
 ```
 
-### Déploiement sur le réseau Ropsten
-```bash
-truffle migrate --network ropsten
+- [contract()](https://trufflesuite.com/docs/truffle/testing/writing-tests-in-javascript/#use-contract-instead-of-describe)
+  - contract() fonctionne de la même manière que describe() de Mocha à la différence que le contrat sera re déployé avant chaque appel de contract().
+  - contract() fournit également la liste des comptes du client Ethereum utilisé.
+
+```js
+contract("SimpleStorage", (accounts) => {
+
+})
+```
+
+---
+
+## Mocha - tests
+- describe()
+  - Quelle fonctionnalité nous devons décrire
+  - structure un ensemble de tests
+  - regroupe les 'workers' comme it()
+
+```js
+describe("Type/nom du test", function () {
+        
+});
+```
+
+- it()
+  - décrire le test d'une façon lisible
+```js
+describe("Type/nom du test", function () {
+    it("...should store the value 89.", async () => {
+        await simpleStorageInstance.set(89, { from: owner });
+        const storedData = await simpleStorageInstance.get.call();
+        expect(new BN(storedData)).to.be.bignumber.equal(new BN(89));
+    });
+});
+```
+
+beforeEach()
+
+
+---
+
+## Tchai - assertions
+```js
+
 ```

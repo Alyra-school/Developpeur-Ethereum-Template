@@ -1,4 +1,4 @@
-const SimpleStorage = artifacts.require("./SimpleStorage.sol");
+const SimpleStorage = artifacts.require("SimpleStorage");
 
 const { BN, expectRevert, expectEvent } = require('@openzeppelin/test-helpers');
 
