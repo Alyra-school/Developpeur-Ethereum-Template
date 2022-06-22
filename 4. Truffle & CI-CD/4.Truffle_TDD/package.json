@@ -1,5 +1,5 @@
 {
-  "name": "truffle_TDD",
+  "name": "truffle-tdd",
   "version": "1.0.0",
   "description": "",
   "main": "truffle-config.js",
@@ -16,5 +16,8 @@
     "@openzeppelin/contracts": "^4.6.0",
     "@truffle/hdwallet-provider": "^2.0.9",
     "dotenv": "^16.0.1"
+  },
+  "devDependencies": {
+    "@openzeppelin/test-helpers": "^0.5.15"
   }
 }
