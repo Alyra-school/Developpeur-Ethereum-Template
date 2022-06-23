@@ -2,7 +2,16 @@ const voting = artifacts.require("Voting");
 const { BN, expectRevert, expectEvent } = require('@openzeppelin/test-helpers');
 const { expect } = require('chai');
 
-contract("Voting", accounts => { 
+// Au minimum
+// • Trois bons tests utilisant expect, expectRevert et expectEvent
+// • les trois sur une fonction a minima
+// • Ajouter un ReadMe, avec les details de vos coverage
+// Pour améliorer le rendu
+// • Utiliser des contextes intelligents
+// • Couverture de test large (toutes les fonctionnalités avec plusieurs tests)
+// • Faire du test unitaire: ne pas trop concatener
+
+contract("Voting", accounts => {
     let votingInstance;
 
     const owner = accounts[0];
@@ -10,14 +19,7 @@ contract("Voting", accounts => {
     const voter2 = accounts[2];
     const voter3 = accounts[3];
 
-    describe.skip("Setter", () => {
-        beforeEach(async () => {
-            votingInstance = await voting.new({ from: owner });
-            await votingInstance.addVoter(voter1, { from: owner })
-        });
-    });
-
-    describe.skip("Getter", () => {
+    describe("Getter", () => {
         beforeEach(async () => {
             votingInstance = await voting.new({ from: owner });
             await votingInstance.addVoter(voter1, { from: owner })
@@ -33,7 +35,7 @@ contract("Voting", accounts => {
             expect(storedData.isRegistered).to.be.false;
         });
 
-        it("should return proposal from id", async() => {
+        it("should return proposal from id", async () => {
             await votingInstance.startProposalsRegistering({ from: owner });
             await votingInstance.addProposal("Premiere proposition", { from: voter1 });
             const storedData = await votingInstance.getOneProposal(0, { from: voter1 });
@@ -51,12 +53,48 @@ contract("Voting", accounts => {
             await votingInstance.startProposalsRegistering({ from: owner });
         });
 
-        it("should return id 0 for first proposal", async() => {
+        
+    })
+
+    describe("Require tests", () => {
+        beforeEach(async () => {
+            votingInstance = await voting.new({ from: owner });
+            await votingInstance.addVoter(voter1, { from: owner });
+            // await votingInstance.startProposalsRegistering({ from: owner });
+        });
+    });
+
+    describe("Proposal tests", () => {
+        beforeEach(async () => {
+            votingInstance = await voting.new({ from: owner });
+            await votingInstance.addVoter(voter1, { from: owner });
+        })
+
+        // Require allowed
+        it("Fail if voting session is not started", async () => {
+            await expectRevert(
+                votingInstance.addProposal("test", { from: voter1 }),
+                'Proposals are not allowed yet'
+            );
+        });
+
+        // Require string proposal
+        it("Fail if proposal is empty", async () => {
+            await votingInstance.startProposalsRegistering({ from: owner });
+            await expectRevert(
+                votingInstance.addProposal("", { from: voter1 }),
+                'Vous ne pouvez pas ne rien proposer'
+            );
+        });
+
+        // Emit proposal registered
+        it("should return id 0 for first proposal", async () => {
+            await votingInstance.startProposalsRegistering({ from: owner });
             await expectEvent(
                 await votingInstance.addProposal("Premiere proposition", { from: voter1 }),
                 "ProposalRegistered",
                 { proposalId: new BN(0) }
             );
         });
-    })
+    });
 });

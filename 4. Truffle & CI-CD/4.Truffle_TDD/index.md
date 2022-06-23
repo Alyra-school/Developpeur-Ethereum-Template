@@ -21,10 +21,20 @@ truffle test test/testfile.js
 truffle --network <nom du réseau>
 ```
 
+## Installation complète
+```bash
+npm install @openzeppelin/test-helpers @openzeppelin/contracts @truffle/hdwallet-provider dotenv
+```
+
 ---
 
 ## Truffle test helpers
-Tout les nombres retournés sont de type [BN](https://github.com/indutny/bn.js) (Big Number)
+```bash
+# Installation
+npm install --save-dev @openzeppelin/test-helpers
+```
+
+Tous les nombres retournés sont de type [BN](https://github.com/indutny/bn.js), (Big Number) [Safe use of BN](https://blog.enuma.io/update/2019/01/31/safe-use-of-bignumber.js.html)
 - [artifacts.require](https://trufflesuite.com/docs/truffle/getting-started/running-migrations/#artifactsrequire)
 
   - Indiquer avec quel contrat intéragir
@@ -108,13 +118,65 @@ describe("Type/nom du test", function () {
 });
 ```
 
+Possible de rajouter .skip ou .only
+
 ---
 
 ## Tchai - assertions
-expect
-
-
+- [expect](https://www.chaijs.com/guide/styles/#expect)
+  - permet de réaliser des assertions
+  - possibilité de les chaîner
 
 ```js
+// Importer expect
+const { expect } = require('chai');
 
+// Exemples
+expect(foo).to.be.a('string');
+expect(foo).to.equal('bar');
+expect(foo).to.have.lengthOf(3);
+expect(foo).to.be.false;
+expect(foo).to.be.true;
 ```
+___
+
+## ETH Gas Reporter
+Rapport sur la consommation de gas pour les tests avec Mocha
+- [API](https://www.npmjs.com/package/eth-gas-reporter)
+  
+```bash
+npm install --save-dev eth-gas-reporter 
+```
+
+A rajouter dans truffle-config.js dans mocha
+
+```js
+mocha: {
+  // timeout: 100000
+  reporter: 'eth-gas-reporter',
+  reporterOptions : { 
+    gasPrice:1,
+    token:'ETH',
+    showTimeSpent: true,
+  }
+},
+```
+___
+
+## Solidity coverage
+⚠️ Ne fonctionne pas sur les dernières versions de Ganache
+- [API](https://github.com/sc-forks/solidity-coverage)
+  
+```bash
+npm install solidity-coverage
+```
+
+A rajouter dans truffle-config.js
+
+```js
+plugins: ["solidity-coverage"],
+```
+____
+
+## Intégration continue
+[ETH doc](https://ethereum.org/fr/developers/tutorials/solidity-and-truffle-continuous-integration-setup/)

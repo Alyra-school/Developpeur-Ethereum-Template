@@ -18,6 +18,16 @@ contract('SimpleStorage', accounts => {
             const storedData = await simpleStorageInstance.get.call();
             expect(new BN(storedData)).to.be.bignumber.equal(new BN(89));
         });
+        
+        
+        it("...should store the value 89.", async () => {
+            await simpleStorageInstance.set(89, { from: owner });
+            const storedData = await simpleStorageInstance.get.call();
+            expect(new BN(storedData)).to.be.bignumber.equal(new BN(89));
+        });
+
+
+
 
         it("...should revert on value 0", async () => {
             await expectRevert(simpleStorageInstance.set(new BN(0), {from:owner}), 'vous ne pouvez pas mettre une valeur nulle');
