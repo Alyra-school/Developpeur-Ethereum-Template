@@ -53,7 +53,7 @@ contract Voting is Ownable {
     function getOneProposal(uint _id) external onlyVoters view returns (Proposal memory) {
         return proposalsArray[_id];
     }
-
+    
  
     // ::::::::::::: REGISTRATION ::::::::::::: // 
 

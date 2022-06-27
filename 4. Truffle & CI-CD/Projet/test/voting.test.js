@@ -2,14 +2,9 @@ const voting = artifacts.require("Voting");
 const { BN, expectRevert, expectEvent } = require('@openzeppelin/test-helpers');
 const { expect } = require('chai');
 
-// Au minimum
-// • Trois bons tests utilisant expect, expectRevert et expectEvent
-// • les trois sur une fonction a minima
 // • Ajouter un ReadMe, avec les details de vos coverage
-// Pour améliorer le rendu
 // • Utiliser des contextes intelligents
 // • Couverture de test large (toutes les fonctionnalités avec plusieurs tests)
-// • Faire du test unitaire: ne pas trop concatener
 
 contract("Voting", accounts => {
     let votingInstance;
@@ -18,11 +13,28 @@ contract("Voting", accounts => {
     const voter1 = accounts[1];
     const voter2 = accounts[2];
     const voter3 = accounts[3];
+    const tourist = accounts[4];
+
+    // ::::::::::::: GETTERS ::::::::::::: //
 
     describe("Getter", () => {
         beforeEach(async () => {
             votingInstance = await voting.new({ from: owner });
             await votingInstance.addVoter(voter1, { from: owner })
+        });
+
+        it("Should be voter to get voter, require", async () => {
+            await expectRevert(
+                votingInstance.getVoter(voter1, { from: tourist }),
+                "You're not a voter"
+            );
+        });
+
+        it("Should be voter to get one proposal, require", async () => {
+            await expectRevert(
+                votingInstance.getOneProposal(0, { from: tourist }),
+                "You're not a voter"
+            );
         });
 
         it("should voter is whitelisted", async () => {
@@ -39,7 +51,7 @@ contract("Voting", accounts => {
             await votingInstance.startProposalsRegistering({ from: owner });
             await votingInstance.addProposal("Premiere proposition", { from: voter1 });
             const storedData = await votingInstance.getOneProposal(0, { from: voter1 });
-            // console.log(storedData);
+
             expect(storedData.description).to.equal("Premiere proposition");
             expect(new BN(storedData.voteCount)).to.be.bignumber.equal(new BN(0));
         });
@@ -50,6 +62,13 @@ contract("Voting", accounts => {
     describe("Registration", () => {
         beforeEach(async () => {
             votingInstance = await voting.new({ from: owner });
+        });
+
+        it("Should only the owner can register voters", async () => {
+            await expectRevert(
+                votingInstance.tallyVotes({ from: tourist }),
+                "Ownable: caller is not the owner"
+            )
         });
 
         it("Shouldn't be able to register, require session started", async () => {
@@ -77,7 +96,6 @@ contract("Voting", accounts => {
             await votingInstance.addVoter(voter1, { from: owner });
         })
 
-        // Require allowed
         it("Should fail if voting session is not started, require", async () => {
             await expectRevert(
                 votingInstance.addProposal("test", { from: voter1 }),
@@ -85,7 +103,6 @@ contract("Voting", accounts => {
             );
         });
 
-        // Require string proposal
         it("Should fail if proposal is empty, require", async () => {
             await votingInstance.startProposalsRegistering({ from: owner });
             await expectRevert(
@@ -203,7 +220,7 @@ contract("Voting", accounts => {
     
     // ::::::::::::: TALLY VOTES ::::::::::::: //
 
-    describe.skip("Tally votes", async () => {
+    describe("Tally votes", async () => {
         beforeEach(async () => {
             votingInstance = await voting.new({ from: owner });
             await votingInstance.addVoter(voter1, { from: owner });
