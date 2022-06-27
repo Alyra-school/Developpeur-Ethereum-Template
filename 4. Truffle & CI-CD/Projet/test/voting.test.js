@@ -2,10 +2,6 @@ const voting = artifacts.require("Voting");
 const { BN, expectRevert, expectEvent } = require('@openzeppelin/test-helpers');
 const { expect } = require('chai');
 
-// • Ajouter un ReadMe, avec les details de vos coverage
-// • Utiliser des contextes intelligents
-// • Couverture de test large (toutes les fonctionnalités avec plusieurs tests)
-
 contract("Voting", accounts => {
     let votingInstance;
 
@@ -23,31 +19,28 @@ contract("Voting", accounts => {
             await votingInstance.addVoter(voter1, { from: owner })
         });
 
-        it("Should be voter to get voter, require", async () => {
+        it("Should be voter to get voter, modifier", async () => {
             await expectRevert(
                 votingInstance.getVoter(voter1, { from: tourist }),
                 "You're not a voter"
             );
         });
 
-        it("Should be voter to get one proposal, require", async () => {
+        it("Should be voter to get one proposal, modifier", async () => {
             await expectRevert(
                 votingInstance.getOneProposal(0, { from: tourist }),
                 "You're not a voter"
             );
         });
 
-        it("should voter is whitelisted", async () => {
+        it("Should return voter struct if whitelisted", async () => {
             const storedData = await votingInstance.getVoter(voter1, { from: voter1 });
             expect(storedData.isRegistered).to.be.true;
+            expect(storedData.hasVoted).to.be.false;
+            expect(new BN(storedData.voteProposalId)).to.be.bignumber.equal(new BN(0));
         });
 
-        it("should voter is not whitelisted", async () => {
-            const storedData = await votingInstance.getVoter(voter2, { from: voter1 });
-            expect(storedData.isRegistered).to.be.false;
-        });
-
-        it("should return proposal from id", async () => {
+        it("Should return proposal from id", async () => {
             await votingInstance.startProposalsRegistering({ from: owner });
             await votingInstance.addProposal("Premiere proposition", { from: voter1 });
             const storedData = await votingInstance.getOneProposal(0, { from: voter1 });
@@ -64,9 +57,9 @@ contract("Voting", accounts => {
             votingInstance = await voting.new({ from: owner });
         });
 
-        it("Should only the owner can register voters", async () => {
+        it("Should only the owner can register voters, modifier", async () => {
             await expectRevert(
-                votingInstance.tallyVotes({ from: tourist }),
+                votingInstance.addVoter(voter1, { from: tourist }),
                 "Ownable: caller is not the owner"
             )
         });
@@ -86,6 +79,14 @@ contract("Voting", accounts => {
                'Already registered'
            );
         });
+
+        it("Should validate new voter registered, emit", async () => {
+            expectEvent(
+                await votingInstance.addVoter(voter1, {from: owner}),
+                "VoterRegistered",
+                { voterAddress: voter1 }
+            )
+        })
     })
 
     // ::::::::::::: PROPOSAL ::::::::::::: // 
@@ -96,9 +97,16 @@ contract("Voting", accounts => {
             await votingInstance.addVoter(voter1, { from: owner });
         })
 
+        it("Should be voter to add proposal, modifier", async () => {
+            await expectRevert(
+                votingInstance.addProposal("Proposition 1", { from: tourist }),
+                "You're not a voter"
+            );
+        });
+
         it("Should fail if voting session is not started, require", async () => {
             await expectRevert(
-                votingInstance.addProposal("test", { from: voter1 }),
+                votingInstance.addProposal("Proposition 1", { from: voter1 }),
                 'Proposals are not allowed yet'
             );
         });
@@ -127,6 +135,14 @@ contract("Voting", accounts => {
         before(async () => {
             votingInstance = await voting.new({ from: owner });
             await votingInstance.addVoter(voter1, { from: owner });
+            await votingInstance.addVoter(voter2, { from: owner });
+        });
+
+        it("Should be voter for vote", async () => {
+            await expectRevert(
+                votingInstance.setVote(0, { from: tourist }),
+                "You're not a voter"
+            );
         });
 
         it("Should voting session started", async () => {
@@ -152,6 +168,13 @@ contract("Voting", accounts => {
             await expectRevert(
                 votingInstance.setVote(0, { from: voter1 }),
                 "You have already voted"
+            );
+        });
+
+        it("Should vote for existing id", async () => {
+            await expectRevert(
+                votingInstance.setVote(10, { from: voter2 }),
+                "Proposal not found"
             );
         });
     });
@@ -246,14 +269,14 @@ contract("Voting", accounts => {
             )
         });
 
-        it("Should voting session endend, require", async () => {
+        it("Should voting session ended, require", async () => {
             await expectRevert(
                 votingInstance.tallyVotes({ from: owner }),
                 "Current status is not voting session ended"
             )
         });
         
-        it("Should winning proposal id is setted", async () => {
+        it("Should winning proposal id setted", async () => {
             await votingInstance.endVotingSession({ from: owner });
             await votingInstance.tallyVotes({ from: owner });
             const storedData = await votingInstance.winningProposalID.call();
