@@ -45,33 +45,40 @@ contract("Voting", accounts => {
         });
     });
 
-    describe("Events tests", () => {
-        // Un voter est ajouté à la liste et proposal started est activé
+    // ::::::::::::: REGISTRATION ::::::::::::: //
+
+    describe("Registration", () => {
         beforeEach(async () => {
             votingInstance = await voting.new({ from: owner });
-            await votingInstance.addVoter(voter1, { from: owner });
-            await votingInstance.startProposalsRegistering({ from: owner });
         });
 
-        
+        it("Shouldn't be able to register, require session started", async () => {
+            await votingInstance.startProposalsRegistering();
+            await expectRevert(
+                 votingInstance.addVoter(voter1, { from: owner }),
+                'Voters registration is not open yet'
+            );
+        });
+
+        it("Shouldn't be able to register a second time, require", async () => {
+            await votingInstance.addVoter(voter1, { from: owner });
+            await expectRevert(
+                votingInstance.addVoter(voter1, { from: owner }),
+               'Already registered'
+           );
+        });
     })
 
-    describe("Require tests", () => {
-        beforeEach(async () => {
-            votingInstance = await voting.new({ from: owner });
-            await votingInstance.addVoter(voter1, { from: owner });
-            // await votingInstance.startProposalsRegistering({ from: owner });
-        });
-    });
+    // ::::::::::::: PROPOSAL ::::::::::::: // 
 
-    describe("Proposal tests", () => {
+    describe("Proposal", () => {
         beforeEach(async () => {
             votingInstance = await voting.new({ from: owner });
             await votingInstance.addVoter(voter1, { from: owner });
         })
 
         // Require allowed
-        it("Fail if voting session is not started", async () => {
+        it("Should fail if voting session is not started, require", async () => {
             await expectRevert(
                 votingInstance.addProposal("test", { from: voter1 }),
                 'Proposals are not allowed yet'
@@ -79,7 +86,7 @@ contract("Voting", accounts => {
         });
 
         // Require string proposal
-        it("Fail if proposal is empty", async () => {
+        it("Should fail if proposal is empty, require", async () => {
             await votingInstance.startProposalsRegistering({ from: owner });
             await expectRevert(
                 votingInstance.addProposal("", { from: voter1 }),
@@ -87,14 +94,162 @@ contract("Voting", accounts => {
             );
         });
 
-        // Emit proposal registered
-        it("should return id 0 for first proposal", async () => {
+        it("Should return id 0 for first proposal, event", async () => {
             await votingInstance.startProposalsRegistering({ from: owner });
-            await expectEvent(
+            expectEvent(
                 await votingInstance.addProposal("Premiere proposition", { from: voter1 }),
                 "ProposalRegistered",
                 { proposalId: new BN(0) }
             );
+        });
+    });
+    
+    // ::::::::::::: VOTE ::::::::::::: //
+
+    describe("Vote", () => {
+        before(async () => {
+            votingInstance = await voting.new({ from: owner });
+            await votingInstance.addVoter(voter1, { from: owner });
+        });
+
+        it("Should voting session started", async () => {
+            await expectRevert(
+                votingInstance.setVote(0, { from: voter1 }),
+                "Voting session havent started yet"
+            );
+        });
+
+        it("Should vote and emit voter proposal id", async () => {
+            await votingInstance.startProposalsRegistering({ from: owner });
+            await votingInstance.addProposal("Proposition 1", { from: voter1 });
+            await votingInstance.endProposalsRegistering({ from: owner });
+            await votingInstance.startVotingSession({ from: owner });
+            await expectEvent(
+                await votingInstance.setVote(0, { from: voter1 }),
+                "Voted",
+                { voter: voter1, proposalId: new BN(0) }
+            )
+        });
+
+        it("Should not already voted", async () => {
+            await expectRevert(
+                votingInstance.setVote(0, { from: voter1 }),
+                "You have already voted"
+            );
+        });
+    });
+
+    // ::::::::::::: STATE ::::::::::::: //
+
+    describe("State", async () => {
+        before(async () => {
+            votingInstance = await voting.new({ from: owner });
+        });
+
+        it("Should ownly owner can call this, require", async () => {
+            await expectRevert(
+                votingInstance.startProposalsRegistering({ from: voter1 }),
+                "Ownable: caller is not the owner"
+            );
+
+            await expectRevert(
+                votingInstance.endProposalsRegistering({ from: voter1 }),
+                "Ownable: caller is not the owner"
+            );
+
+            await expectRevert(
+                votingInstance.startVotingSession({ from: voter1 }),
+                "Ownable: caller is not the owner"
+            );
+
+            await expectRevert(
+                votingInstance.endVotingSession({ from: voter1 }),
+                "Ownable: caller is not the owner"
+            );
+        });
+
+        it("Should start proposal registering, emit", async () => {
+            expectEvent(
+                await votingInstance.startProposalsRegistering({ from: owner }),
+                "WorkflowStatusChange",
+                { previousStatus: new BN(0), newStatus: new BN(1) }
+            );
+        });
+
+        it("Should end proposals registering, emit", async () => {
+            expectEvent(
+                await votingInstance.endProposalsRegistering({ from: owner }),
+                "WorkflowStatusChange",
+                { previousStatus: new BN(1), newStatus: new BN(2) }
+            );
+        });
+
+        it("Should start voting session, emit", async () => {
+            expectEvent(
+                await votingInstance.startVotingSession({ from: owner }),
+                "WorkflowStatusChange",
+                { previousStatus: new BN(2), newStatus: new BN(3) }
+            );
+        });
+
+        it("Should end voting session, emit", async () => {
+            expectEvent(
+                await votingInstance.endVotingSession({ from: owner }),
+                "WorkflowStatusChange",
+                { previousStatus: new BN(3), newStatus: new BN(4) }
+            );
+        });
+    });
+    
+    // ::::::::::::: TALLY VOTES ::::::::::::: //
+
+    describe.skip("Tally votes", async () => {
+        beforeEach(async () => {
+            votingInstance = await voting.new({ from: owner });
+            await votingInstance.addVoter(voter1, { from: owner });
+            await votingInstance.addVoter(voter2, { from: owner });
+            await votingInstance.addVoter(voter3, { from: owner });
+            
+            await votingInstance.startProposalsRegistering({ from: owner });
+            await votingInstance.addProposal("Proposal 1", { from: voter1 });
+            await votingInstance.addProposal("Proposal 2", { from: voter2 });
+            await votingInstance.addProposal("Proposal 3", { from: voter3 });
+            await votingInstance.endProposalsRegistering({ from: owner });
+
+            await votingInstance.startVotingSession({ from: owner });
+            await votingInstance.setVote(0, { from: voter1 });
+            await votingInstance.setVote(0, { from: voter2 });
+            await votingInstance.setVote(2, { from: voter3 });
+        });
+
+        it("Should only owner can tally vote, require", async () => {
+            await expectRevert(
+                votingInstance.tallyVotes({ from: voter1 }),
+                "Ownable: caller is not the owner"
+            )
+        });
+
+        it("Should voting session endend, require", async () => {
+            await expectRevert(
+                votingInstance.tallyVotes({ from: owner }),
+                "Current status is not voting session ended"
+            )
+        });
+        
+        it("Should winning proposal id is setted", async () => {
+            await votingInstance.endVotingSession({ from: owner });
+            await votingInstance.tallyVotes({ from: owner });
+            const storedData = await votingInstance.winningProposalID.call();
+            expect(new BN(storedData.words[0])).to.be.bignumber.equal(new BN(0));
+        });
+
+        it("Should update workflow status, emit", async () => {
+            await votingInstance.endVotingSession({ from: owner });
+            expectEvent(
+                await votingInstance.tallyVotes({ from: owner }),
+                "WorkflowStatusChange",
+                { previousStatus: new BN(4), newStatus: new BN(5) }
+            )
         });
     });
 });
