@@ -257,7 +257,7 @@ mocha: {
 ___
 
 ## Solidity coverage
-⚠️ Ne fonctionne pas sur les dernières versions de Ganache
+⚠️ Ne fonctionne pas sur les dernières versions de Ganache / Truffle, faire un downgrade
 - [API](https://github.com/sc-forks/solidity-coverage)
   
 ```bash
@@ -268,6 +268,23 @@ A rajouter dans truffle-config.js
 
 ```js
 plugins: ["solidity-coverage"],
+```
+
+Dans package.json, downgrader la version en 0.7.17
+```js
+"devDependencies": {
+    "solidity-coverage": "0.7.17"
+}
+```
+
+```bash
+# Réinstaller les librairies pour prendre en compte la nouvelle version
+npm install
+```
+
+```bash
+# Lancer le coverage
+truffle run coverage
 ```
 ____
 
