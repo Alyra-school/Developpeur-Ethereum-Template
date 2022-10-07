@@ -7,4 +7,9 @@ contract Whitelist {
 
     event Authorized(address _address);
 
+    function authorize(address _address) public {
+        whitelist[_address] = true;
+        emit Authorized(_address);
+    }
+
 }
