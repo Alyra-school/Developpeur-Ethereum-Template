@@ -97,4 +97,20 @@ contract Voting is Ownable {
         return winningProposalId;
     }
 
+    function getStatus() public view returns(string memory) {
+        if(status == WorkflowStatus.RegisteringVoters){
+            return "RegisteringVoters";
+        } else if(status == WorkflowStatus.ProposalsRegistrationStarted){
+            return "ProposalsRegistrationStarted";
+        } else if(status == WorkflowStatus.ProposalsRegistrationEnded){
+            return "ProposalsRegistrationEnded";
+        } else if(status == WorkflowStatus.VotingSessionStarted){
+            return "VotingSessionStarted";
+        } else if(status == WorkflowStatus.VotingSessionEnded){
+            return "VotingSessionEnded";
+        } else {
+            return "VotesTallied";
+        } 
+    }
+
 }
