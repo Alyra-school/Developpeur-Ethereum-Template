@@ -76,6 +76,7 @@ contract Voting is Ownable {
         proposals[_proposalId].voteCount ++;
         whitelist[msg.sender].hasVoted = true;
         whitelist[msg.sender].votedProposalId = _proposalId;
+        emit Voted(msg.sender, _proposalId);
     }
 
     function endVotingSession() public onlyOwner checkStatus(WorkflowStatus.VotingSessionStarted) {
