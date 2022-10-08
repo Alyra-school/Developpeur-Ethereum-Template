@@ -2,6 +2,8 @@
 pragma solidity 0.8.14;
 
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Strings.sol";
+
 
 contract Voting is Ownable {
     
@@ -30,6 +32,7 @@ contract Voting is Ownable {
     uint winningProposalId;
 
     modifier checkStatus(WorkflowStatus _status) {
+        require(status != WorkflowStatus(uint(_status)-1), "You are already in this status");
         require(status == _status, "Invalid workflow status");
         _;
     }
@@ -51,6 +54,7 @@ contract Voting is Ownable {
     }
 
     function startProposalsRegistration() public onlyOwner checkStatus(WorkflowStatus.RegisteringVoters) {
+        proposals.push(Proposal("Genesys", 0));
         status = WorkflowStatus.ProposalsRegistrationStarted;
         emit WorkflowStatusChange(WorkflowStatus.RegisteringVoters, status);
     }
@@ -61,6 +65,7 @@ contract Voting is Ownable {
     }
 
     function endProposalsRegistration() public onlyOwner checkStatus(WorkflowStatus.ProposalsRegistrationStarted) {
+        require(proposals.length > 1, "Minimum one proposal must be sent");
         status = WorkflowStatus.ProposalsRegistrationEnded;
         emit WorkflowStatusChange(WorkflowStatus.ProposalsRegistrationStarted, status);
     }
@@ -72,7 +77,8 @@ contract Voting is Ownable {
 
     function vote(uint _proposalId) public onlyWhitelisted checkStatus(WorkflowStatus.VotingSessionStarted) {
         require(!whitelist[msg.sender].hasVoted, "You have already voted");
-        require(_proposalId < proposals.length, "No proposal matching this id");
+        require(_proposalId > 0, "The id must be strictly superior to 0");
+        require(_proposalId < proposals.length, string.concat("No proposal matching this id. The id must be strictly inferior to ", Strings.toString(proposals.length)));
         proposals[_proposalId].voteCount ++;
         whitelist[msg.sender].hasVoted = true;
         whitelist[msg.sender].votedProposalId = _proposalId;
@@ -85,7 +91,7 @@ contract Voting is Ownable {
     }
 
     function votesTally() public onlyOwner checkStatus(WorkflowStatus.VotingSessionEnded) {
-        for(uint i=0; i<proposals.length; i++){
+        for(uint i=1; i<proposals.length; i++){
             if(proposals[i].voteCount > winningProposalId) {
                 winningProposalId = i;
             }
