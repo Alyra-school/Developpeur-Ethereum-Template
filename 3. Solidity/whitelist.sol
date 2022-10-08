@@ -6,18 +6,19 @@ contract Whitelist {
     mapping (address => bool) whitelist;
 
     event Authorized(address _address);
-
-    function authorize(address _address) public {
-        require(check(), "Not authorized");
-        whitelist[_address] = true;
-        emit Authorized(_address);
+    
+    constructor() {
+        whitelist[msg.sender] = true;
     }
 
-    function check() private view returns(bool){
-        if (whitelist[msg.sender] == true){
-            return true;
-        }
-        return false;
+    modifier check() {
+        require(whitelist[msg.sender] == true, "Not authorized");
+        _;
+    }
+
+    function authorize(address _address) public check {
+        whitelist[_address] = true;
+        emit Authorized(_address);
     }
 
 }
