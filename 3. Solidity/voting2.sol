@@ -59,6 +59,7 @@ contract Voting is Ownable {
             proposals.push(Proposal("Genesys", 0));
         } else if(_newStatus == WorkflowStatus.ProposalsRegistrationEnded){
             require(status == WorkflowStatus.ProposalsRegistrationStarted, "Invalid status. Status required is ProposalsRegistrationStarted");
+            require(proposals.length > 1, "Minimum one proposal must be sent");
         } else if(_newStatus == WorkflowStatus.VotingSessionStarted){
             require(status == WorkflowStatus.ProposalsRegistrationEnded, "Invalid status. Status required is ProposalsRegistrationEnded");
         } else if(_newStatus == WorkflowStatus.VotingSessionEnded){
