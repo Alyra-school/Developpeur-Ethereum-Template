@@ -5,5 +5,7 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/contracts/token/E
 
 contract ERC20Token is ERC20 {
 
-    constructor() ERC20("BADISSE", "BAD") {}
+    constructor(uint initialSupply) ERC20("BADISSE", "BAD") {
+        _mint(msg.sender, initialSupply);
+    }
 }
