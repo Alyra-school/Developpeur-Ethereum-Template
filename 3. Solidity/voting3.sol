@@ -53,7 +53,6 @@ contract Voting is Ownable {
     }
 
     function updateStatus(WorkflowStatus _newStatus) public onlyOwner {
-        require(status != _newStatus, "You are already in this status");
         require(status == WorkflowStatus(uint(_newStatus)-1), "You can not switch to this status. You are not in the appropriate status");
         if(_newStatus == WorkflowStatus.ProposalsRegistrationStarted){
             proposals.push(Proposal("Genesys", 0));
