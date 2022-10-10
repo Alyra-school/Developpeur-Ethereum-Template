@@ -53,7 +53,6 @@ contract Voting is Ownable {
     }
 
     function updateStatus(WorkflowStatus _newStatus) public onlyOwner {
-        require(status != _newStatus, "You are already in this status");
         if(_newStatus == WorkflowStatus.ProposalsRegistrationStarted){
             require(status == WorkflowStatus.RegisteringVoters, "Invalid status. Status required is RegisteringVoters");
             proposals.push(Proposal("Genesys", 0));
