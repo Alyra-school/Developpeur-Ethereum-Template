@@ -32,7 +32,6 @@ contract Voting is Ownable {
     uint winningProposalId;
 
     modifier checkStatus(WorkflowStatus _status) {
-        require(status != WorkflowStatus(uint(_status)-1), "You are already in this status");
         require(status == _status, "Invalid workflow status");
         _;
     }
