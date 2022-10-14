@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  ganache:
+    image: trufflesuite/ganache-cli
+    ports:
+      - 8545:8545
+
+
+  truffle:
+    build:
+      context: truffle
+    ports:
+      - 3000:3000
+    tty: true
+    volumes:
+      - $SSH_AUTH_SOCK:/ssh-agent
+      - ./truffle:/src
+    environment:
+      SSH_AUTH_SOCK: /ssh-agent
+      INFURA_ID: ${INFURA_ID}
+      ALCHEMY_ID: ${ALCHEMY_ID}
+      MNEMONIC: ${MNEMONIC}
