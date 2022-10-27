@@ -3,7 +3,7 @@ name: Build Project 2
 on:
   push:
     paths:
-      - "4.\ Truffle\ \&\ CI-CD/Tests/Projet/hardhat/**"
+      - 4.\ Truffle\ \&\ CI-CD/Tests/Projet/hardhat/**
     paths-ignore:
       - '**.md'
 
