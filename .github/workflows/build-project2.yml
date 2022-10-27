@@ -25,7 +25,7 @@ jobs:
           cache: yarn
           cache-dependency-path: 4.\ Truffle\ \&\ CI-CD/Tests/Projet/hardhat/yarn.lock
       - name: Install project dependencies
-        run: yarn install --frozen-lockfile
+        run: cd 4.\ Truffle\ \&\ CI-CD/Tests/Projet/hardhat && yarn install --frozen-lockfile
       - name: Compile contracts
         run: cd 4.\ Truffle\ \&\ CI-CD/Tests/Projet/hardhat && yarn hardhat compile
       - name: Test contracts
