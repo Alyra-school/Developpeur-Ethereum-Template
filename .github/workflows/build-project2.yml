@@ -1,10 +1,10 @@
 name: Build Project 2
 
 on:
-  workflow_dispatch:
   push:
     paths:
       - 4.\ Truffle\ \&\ CI-CD/Tests/Projet/hardhat/**
+  workflow_dispatch:
 
 defaults:
   run:
@@ -19,6 +19,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
+          cache: yarn
+          cache-dependency-path: 4.\ Truffle\ \&\ CI-CD/Tests/Projet/hardhat/yarn.lock
       - name: Install project dependencies
         run: yarn install --frozen-lockfile
       - name: Compile contracts
