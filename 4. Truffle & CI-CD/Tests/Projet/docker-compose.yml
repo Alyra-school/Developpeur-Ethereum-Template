@@ -1,0 +1,7 @@
+version: '3.8'
+
+services:
+  hardhat-typescript:
+    build: ./
+    volumes:
+      - ./hardhat:/usr/src/app
