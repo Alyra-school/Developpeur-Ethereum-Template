@@ -4,8 +4,6 @@ on:
   push:
     paths:
       - 4.\ Truffle\ \&\ CI-CD/Tests/Projet/hardhat/**
-    paths-ignore:
-      - '**.md'
 
 jobs:
   build:
