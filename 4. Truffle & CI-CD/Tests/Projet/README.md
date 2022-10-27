@@ -5,8 +5,8 @@
 * [General Info](#general-information)
 * [Technologies Used](#technologies-used)
 * [Setup](#setup)
-* [Project Status](#project-status)
-* [Room for Improvement](#room-for-improvement)
+* [Tests description](#tests-description)
+
 
 
 ## General Information
@@ -59,4 +59,5 @@ make test
 make coverage
 ```
 
+## Tests description
 
