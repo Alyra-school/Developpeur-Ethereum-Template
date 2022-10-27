@@ -1,10 +1,6 @@
 name: Build Project 2
 
-on:
-  push:
-    paths:
-      - 4.\ Truffle\ \&\ CI-CD/Tests/Projet/hardhat/**
-  workflow_dispatch:
+on: workflow_dispatch
 
 jobs:
   build:
