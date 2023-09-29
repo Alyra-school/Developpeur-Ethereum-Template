@@ -1,1 +1,0 @@
-Ethereum par la pratique
